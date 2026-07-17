@@ -24,10 +24,12 @@ const routes = [
   // { path: '/warnings',        component: () => import('@/views/doctor/WarningManage.vue') },
   // { path: '/followup',        component: () => import('@/views/doctor/FollowupManage.vue') },
   // { path: '/assessment',      component: () => import('@/views/doctor/AssessmentManage.vue') },
-  // { path: '/device-repair',   component: () => import('@/views/doctor/DeviceRepair.vue') },
-  // { path: '/devices',         component: () => import('@/views/device/DeviceManage.vue') },
-  // { path: '/device-monitor',  component: () => import('@/views/device/DeviceMonitor.vue') },
-  // { path: '/device-status',   component: () => import('@/views/device/DeviceStatus.vue') },
+
+  // C 的设备管理布局（临时，等 A 统一框架后合并）
+  { path: '/device-dashboard', component: () => import('@/views/device/Dashboard.vue') },
+  { path: '/devices',         component: () => import('@/views/device/DeviceManage.vue') },
+  { path: '/tags',            component: () => import('@/views/device/TagManage.vue') },
+  { path: '/device-repair',   component: () => import('@/views/doctor/DeviceRepair.vue') },
 
   // 404
   {
