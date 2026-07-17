@@ -1,0 +1,22 @@
+# OS
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# IDE
+.idea/
+.vscode/
+*.iml
+*.iws
+*.ipr
+.settings/
+.classpath
+.project
+
+# Logs
+logs/
+*.log
+
+# Environment
+.env
+.env.local
