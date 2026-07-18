@@ -12,9 +12,9 @@
         text-color="#bfcbd9"
         active-text-color="#409eff"
       >
-        <el-menu-item index="/dashboard">
+        <el-menu-item index="/doctor-dashboard">
           <el-icon><DataBoard /></el-icon>
-          <span>工作台</span>
+          <span>医生工作台</span>
         </el-menu-item>
         <el-menu-item index="/doctors">
           <el-icon><UserFilled /></el-icon>
@@ -27,6 +27,19 @@
         <el-menu-item index="/reports">
           <el-icon><Document /></el-icon>
           <span>报表统计</span>
+        </el-menu-item>
+
+        <el-menu-item index="/elderly">
+          <el-icon><Avatar /></el-icon>
+          <span>老人档案</span>
+        </el-menu-item>
+        <el-menu-item index="/health-import">
+          <el-icon><Upload /></el-icon>
+          <span>健康导入</span>
+        </el-menu-item>
+        <el-menu-item index="/health-trend">
+          <el-icon><TrendCharts /></el-icon>
+          <span>趋势图</span>
         </el-menu-item>
       </el-menu>
     </el-aside>
@@ -54,7 +67,7 @@
 import { computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { DataBoard, UserFilled, Connection, Document } from '@element-plus/icons-vue'
+import { DataBoard, UserFilled, Connection, Document, Avatar, Upload, TrendCharts } from '@element-plus/icons-vue'
 import { delStorage } from '@/utils/localStorage.js'
 
 const router = useRouter()
