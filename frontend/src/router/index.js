@@ -10,19 +10,33 @@ const routes = [
     meta: { title: '登录 — 智慧医养管理系统' },
   },
 
-  // ===== 后台管理页（共享 LayoutView 布局） =====
+  // ===== 后台管理页（共享 LayoutView 布局，按角色过滤菜单） =====
   {
     path: '/',
     component: () => import('@/views/LayoutView.vue'),
     redirect: '/dashboard',
     children: [
-      // ===== A 负责 =====
+      // ===== A 负责：管理员通用 =====
       {
         path: 'dashboard',
         name: 'Dashboard',
         component: () => import('@/views/DashboardView.vue'),
         meta: { title: '工作台' },
       },
+      {
+        path: 'reports',
+        name: 'Reports',
+        component: () => import('@/views/org/ReportsView.vue'),
+        meta: { title: '报表统计' },
+      },
+      // ===== A 负责：机构管理员专属 =====
+      {
+        path: 'communities',
+        name: 'CommunityManage',
+        component: () => import('@/views/org/CommunityManage.vue'),
+        meta: { title: '社区管理' },
+      },
+      // ===== A 负责：社区管理员专属 =====
       {
         path: 'doctors',
         name: 'DoctorManage',
@@ -35,47 +49,73 @@ const routes = [
         component: () => import('@/views/com/ElderlyAssignView.vue'),
         meta: { title: '老人分配' },
       },
+
+      // ===== B 负责：医生端 =====
       {
-        path: 'reports',
-        name: 'Reports',
-        component: () => import('@/views/org/ReportsView.vue'),
-        meta: { title: '报表统计' },
+        path: 'doctor-dashboard',
+        name: 'DoctorDashboard',
+        component: () => import('@/views/doctor/Dashboard.vue'),
+        meta: { title: '医生工作台' },
+      },
+      {
+        path: 'elderly',
+        name: 'ElderlyList',
+        component: () => import('@/views/doctor/ElderlyList.vue'),
+        meta: { title: '老人档案' },
+      },
+      {
+        path: 'elderly-new',
+        name: 'ElderlyNew',
+        component: () => import('@/views/doctor/ElderlyList.vue'),
+        meta: { title: '本月新增老人', filter: 'new' },
+      },
+      {
+        path: 'health-import',
+        name: 'HealthImport',
+        component: () => import('@/views/doctor/HealthImport.vue'),
+        meta: { title: '健康导入' },
+      },
+      {
+        path: 'health-trend',
+        name: 'HealthTrend',
+        component: () => import('@/views/doctor/HealthTrend.vue'),
+        meta: { title: '趋势图' },
       },
 
-      // ===== B 负责 =====
-      // { path: 'elderly', ... },
-      // { path: 'health-import', ... },
+      // ===== B/C 共用：医生端设备报修 =====
+      {
+        path: 'device-repair',
+        name: 'DeviceRepair',
+        component: () => import('@/views/doctor/DeviceRepair.vue'),
+        meta: { title: '设备报修' },
+      },
 
-      // ===== C 负责 =====
-      // { path: 'warnings', ... },
-      // { path: 'followup', ... },
-      // { path: 'devices', ... },
+      // ===== C 负责：设备管理员 =====
+      {
+        path: 'device-dashboard',
+        name: 'DeviceDashboard',
+        component: () => import('@/views/device/Dashboard.vue'),
+        meta: { title: '设备Dashboard' },
+      },
+      {
+        path: 'devices',
+        name: 'DeviceManage',
+        component: () => import('@/views/device/DeviceManage.vue'),
+        meta: { title: '设备台账' },
+      },
+      {
+        path: 'tags',
+        name: 'TagManage',
+        component: () => import('@/views/device/TagManage.vue'),
+        meta: { title: '标签管理' },
+      },
+
+      // ===== C 负责：医生端医疗服务（待 C 开发） =====
+      // { path: 'warnings',  component: () => import('@/views/doctor/WarningList.vue') },
+      // { path: 'followup',  component: () => import('@/views/doctor/FollowupManage.vue') },
+      // { path: 'assessment', component: () => import('@/views/doctor/AssessmentManage.vue') },
     ],
   },
-  // ===== A 负责：机构管理员 + 社区管理员 =====
-  // { path: '/dashboard',  component: () => import('@/views/org/Dashboard.vue') },
-  // { path: '/reports',    component: () => import('@/views/org/Reports.vue') },
-  // { path: '/doctors',    component: () => import('@/views/com/DoctorManage.vue') },
-  // { path: '/assign',     component: () => import('@/views/com/ElderlyAssign.vue') },
-  // { path: '/com-reports',component: () => import('@/views/com/CommunityReports.vue') },
-
-  // ===== B 负责：社区医生 — 老人与健康 =====
-  { path: '/doctor-dashboard', component: () => import('@/views/doctor/Dashboard.vue'), meta: { title: '工作台' }  },
-  { path: '/elderly',         component: () => import('@/views/doctor/ElderlyList.vue'), meta: { title: '老人档案' }  },
-  { path: '/elderly-new',     component: () => import('@/views/doctor/ElderlyList.vue'), meta: { title: '本月新增老人', filter: 'new' } },
-  { path: '/health-import',   component: () => import('@/views/doctor/HealthImport.vue'), meta: { title: '健康导入' }  },
-  { path: '/health-trend',    component: () => import('@/views/doctor/HealthTrend.vue'), meta: { title: '趋势图' }  },
-
-  // ===== C 负责：社区医生 — 医疗服务 + 设备管理 =====
-  // { path: '/warnings',        component: () => import('@/views/doctor/WarningList.vue'), meta: { title: '预警记录' } },  // TODO: C 创建 WarningList.vue 后解注释
-  // { path: '/followup',        component: () => import('@/views/doctor/FollowupManage.vue') },
-  // { path: '/assessment',      component: () => import('@/views/doctor/AssessmentManage.vue') },
-
-  // C 的设备管理布局（临时，等 A 统一框架后合并）
-  { path: '/device-dashboard', component: () => import('@/views/device/Dashboard.vue') },
-  { path: '/devices',         component: () => import('@/views/device/DeviceManage.vue') },
-  { path: '/tags',            component: () => import('@/views/device/TagManage.vue') },
-  { path: '/device-repair',   component: () => import('@/views/doctor/DeviceRepair.vue') },
 
   // 404
   {

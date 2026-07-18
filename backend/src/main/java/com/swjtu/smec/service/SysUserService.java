@@ -9,7 +9,10 @@ import java.util.Map;
 public interface SysUserService extends IService<SysUser> {
 
     // ===== 认证相关 =====
-    String login(String username, String password);
+    /**
+     * 登录，返回 token + 角色信息
+     */
+    Map<String, Object> login(String username, String password);
     void logout(String token);
 
     // ===== 医生管理 =====

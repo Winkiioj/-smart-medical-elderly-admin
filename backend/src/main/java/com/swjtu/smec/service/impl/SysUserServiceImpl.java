@@ -46,7 +46,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser>
     // ========== 认证 ==========
 
     @Override
-    public String login(String username, String password) {
+    public Map<String, Object> login(String username, String password) {
         LambdaQueryWrapper<SysUser> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(SysUser::getUsername, username);
         SysUser user = this.baseMapper.selectOne(wrapper);
@@ -55,24 +55,52 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser>
         if (user.getStatus() == 0) throw new RuntimeException("账号已被禁用，请联系管理员");
 
         boolean matches;
-        if (user.getPassword().startsWith("$2a$") || user.getPassword().startsWith("$2b$")) {
-            matches = passwordEncoder.matches(password, user.getPassword());
+        String dbPwd = user.getPassword();
+        if (dbPwd.startsWith("$2a$") || dbPwd.startsWith("$2b$")) {
+            matches = passwordEncoder.matches(password, dbPwd);
+        } else if (dbPwd.startsWith("{noop}")) {
+            // Spring Security 明文标记：{noop}123456 → 剥离前缀后比较
+            matches = password.equals(dbPwd.substring(6));
         } else {
-            matches = password.equals(user.getPassword());
+            matches = password.equals(dbPwd);
         }
         if (!matches) throw new RuntimeException("用户名或密码错误");
+
+        // 查询用户所有角色
+        String roleSql = "SELECT r.id AS role_id, r.role_code, r.role_name FROM sys_role r " +
+                "INNER JOIN sys_user_role ur ON r.id = ur.role_id WHERE ur.user_id = ?";
+        List<Map<String, Object>> roles = jdbcTemplate.queryForList(roleSql, user.getId());
+
+        // 用 FastJSON 序列化角色列表写入 Redis（兼容旧格式）
+        String rolesJson = "[]";
+        if (!roles.isEmpty()) {
+            rolesJson = com.alibaba.fastjson.JSON.toJSONString(roles);
+        }
+        String firstRoleCode = roles.isEmpty() ? "" : (String) roles.get(0).get("role_code");
+        String firstRoleName = roles.isEmpty() ? "" : (String) roles.get(0).get("role_name");
 
         String token = UUID.randomUUID().toString().replace("-", "");
         String userJson = "{\"userId\":" + user.getId()
                 + ",\"username\":\"" + user.getUsername()
                 + "\",\"realName\":\"" + (user.getRealName() != null ? user.getRealName() : "")
                 + "\",\"community\":\"" + (user.getCommunity() != null ? user.getCommunity() : "")
-                + "\"}";
+                + "\",\"roleCode\":\"" + firstRoleCode
+                + "\",\"roleName\":\"" + firstRoleName
+                + "\",\"roles\":" + rolesJson
+                + "}";
         redisTemplate.opsForValue().set("Token::" + token, userJson, TOKEN_TTL);
 
         user.setLastLoginTime(LocalDateTime.now());
         this.baseMapper.updateById(user);
-        return token;
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("token", token);
+        result.put("roleCode", firstRoleCode);
+        result.put("roleName", firstRoleName);
+        result.put("roles", roles);
+        result.put("community", user.getCommunity() != null ? user.getCommunity() : "");
+        result.put("realName", user.getRealName() != null ? user.getRealName() : "");
+        return result;
     }
 
     @Override

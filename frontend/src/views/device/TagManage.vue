@@ -1,5 +1,4 @@
 <template>
-  <DeviceLayout>
   <div class="tag-manage">
     <el-breadcrumb separator="/">
       <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
@@ -50,14 +49,12 @@
       </template>
     </el-dialog>
   </div>
-  </DeviceLayout>
 </template>
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { getTagList, addTag, updateTag, deleteTag } from '@/api/tag'
-import DeviceLayout from '@/components/DeviceLayout.vue'
 
 const loading = ref(false)
 const tags = ref([])
