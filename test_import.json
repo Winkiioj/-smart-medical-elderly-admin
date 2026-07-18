@@ -1,0 +1,57 @@
+{
+  "doctor_id": 3,
+  "records": [
+    {
+      "elderly_id": 1,
+      "measure_date": "2026-07-17",
+      "measure_time": "08:30",
+      "systolic_pressure": 158,
+      "diastolic_pressure": 92,
+      "heart_rate": 86,
+      "blood_sugar": 7.5,
+      "blood_oxygen": 95,
+      "weight": 60.2,
+      "height": 158.0,
+      "temperature": 36.6,
+      "remark": "降压药调整后一周复测，血压仍偏高"
+    },
+    {
+      "elderly_id": 2,
+      "measure_date": "2026-07-17",
+      "measure_time": "09:00",
+      "systolic_pressure": 138,
+      "diastolic_pressure": 84,
+      "heart_rate": 74,
+      "blood_sugar": 5.9,
+      "blood_oxygen": 97,
+      "weight": 69.0,
+      "height": 170.0,
+      "temperature": 36.4,
+      "remark": "状态良好"
+    },
+    {
+      "elderly_id": 3,
+      "measure_date": "2026-07-17",
+      "systolic_pressure": 150,
+      "diastolic_pressure": 88,
+      "heart_rate": 80,
+      "blood_oxygen": 96,
+      "weight": 57.0,
+      "height": 165.0
+    },
+    {
+      "elderly_id": 5,
+      "measure_date": "2026-07-17",
+      "measure_time": "10:00",
+      "systolic_pressure": 180,
+      "diastolic_pressure": 105,
+      "heart_rate": 92,
+      "blood_sugar": 5.8,
+      "blood_oxygen": 91,
+      "weight": 63.5,
+      "height": 168.0,
+      "temperature": 37.0,
+      "remark": "血压危象！家属已送急诊"
+    }
+  ]
+}
