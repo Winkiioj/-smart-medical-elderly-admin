@@ -1,0 +1,34 @@
+ Smart Medical-Elderly Care Management System
+
+  简写：SMEC-MS 或直接 Medical-Elderly Care Admin
+
+  ---
+  拆开来看：
+
+  Smart          →智慧
+  Medical-Elderly → 医养
+  Care           →照护/服务
+  Management     →管理
+  System         →系统
+
+  也可以精简为：
+
+  ┌──────────────────┬──────────────────────────────────────────────┬──────────────────────────────┐
+  │       方案       │                     全称                     │           适合场景           │
+  ├──────────────────┼──────────────────────────────────────────────┼──────────────────────────────┤
+  │ SMECMS           │ Smart Medical-Elderly Care Management System │ 包名、数据库名、代码中引用   │
+  ├──────────────────┼──────────────────────────────────────────────┼──────────────────────────────┤
+  │ 智慧医养管理系统 │ —                                           │ PPT 封面、答辩标题、文档标题 │
+  └──────────────────┴──────────────────────────────────────────────┴──────────────────────────────┘
+
+  ---
+  具体用在哪
+
+  Git 仓库名：     smart-medical-elderly-admin
+  Maven groupId：  com.swjtu.smec
+  数据库名：       smec_db
+  SpringBoot 项目名：smart-medical-admin
+  包名：           com.swjtu.smec
+  PPT 标题：       智慧医养大数据公共服务平台-云端后台管理系统
+                  (Smart Medical-Elderly Care Management System)
+  系统左上角 Logo：智慧医养管理系统

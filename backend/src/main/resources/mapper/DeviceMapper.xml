@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.swjtu.smec.mapper.DeviceMapper">
+
+    <select id="selectPage" resultType="com.swjtu.smec.entity.Device">
+        SELECT * FROM device
+        <where>
+            <if test="keyword != null and keyword != ''">
+                AND (device_no LIKE CONCAT('%', #{keyword}, '%')
+                OR device_name LIKE CONCAT('%', #{keyword}, '%'))
+            </if>
+            <if test="deviceType != null and deviceType != ''">
+                AND device_type = #{deviceType}
+            </if>
+            <if test="status != null">
+                AND status = #{status}
+            </if>
+            <if test="community != null and community != ''">
+                AND community = #{community}
+            </if>
+        </where>
+        ORDER BY create_time DESC
+    </select>
+
+</mapper>
