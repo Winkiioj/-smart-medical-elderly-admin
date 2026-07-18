@@ -28,6 +28,36 @@
           <el-icon><Document /></el-icon>
           <span>报表统计</span>
         </el-menu-item>
+
+        <!-- ===== C 负责 ===== -->
+        <el-menu-item index="/warnings">
+          <el-icon><Bell /></el-icon>
+          <span>预警记录</span>
+        </el-menu-item>
+        <el-menu-item index="/followup">
+          <el-icon><Calendar /></el-icon>
+          <span>随访管理</span>
+        </el-menu-item>
+        <el-menu-item index="/assessment">
+          <el-icon><Document /></el-icon>
+          <span>评估报告</span>
+        </el-menu-item>
+        <el-menu-item index="/device-dashboard">
+          <el-icon><Monitor /></el-icon>
+          <span>设备 Dashboard</span>
+        </el-menu-item>
+        <el-menu-item index="/devices">
+          <el-icon><Setting /></el-icon>
+          <span>设备台账</span>
+        </el-menu-item>
+        <el-menu-item index="/tags">
+          <el-icon><Collection /></el-icon>
+          <span>标签管理</span>
+        </el-menu-item>
+        <el-menu-item index="/device-repair">
+          <el-icon><WarnTriangleFilled /></el-icon>
+          <span>设备报修</span>
+        </el-menu-item>
       </el-menu>
     </el-aside>
 
@@ -54,7 +84,7 @@
 import { computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { DataBoard, UserFilled, Connection, Document } from '@element-plus/icons-vue'
+import { DataBoard, UserFilled, Connection, Document, Bell, Calendar, Monitor, Setting, Collection, WarnTriangleFilled } from '@element-plus/icons-vue'
 import { delStorage } from '@/utils/localStorage.js'
 
 const router = useRouter()

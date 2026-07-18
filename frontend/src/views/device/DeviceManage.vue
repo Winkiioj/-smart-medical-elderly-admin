@@ -1,5 +1,4 @@
 <template>
-  <DeviceLayout>
   <div class="device-manage">
     <!-- 面包屑 -->
     <el-breadcrumb separator="/">
@@ -155,14 +154,12 @@
       </template>
     </el-dialog>
   </div>
-  </DeviceLayout>
 </template>
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { getDevicePage, getDeviceDetail, addDevice, updateDevice, updateDeviceStatus, getDeviceStats } from '@/api/device'
-import DeviceLayout from '@/components/DeviceLayout.vue'
 
 // ===== 数据 =====
 const loading = ref(false)
@@ -239,7 +236,7 @@ const fetchStats = async () => {
     if (res.code === 200) {
       Object.assign(stats, res.data)
     }
-  } catch { /* ignore */ }
+  } catch { ElMessage.error('操作失败') }
 }
 
 const handleSearch = () => {
@@ -269,7 +266,7 @@ const handleEdit = async (row) => {
     if (res.code === 200) {
       Object.assign(form, res.data)
     }
-  } catch { /* ignore */ }
+  } catch { ElMessage.error('操作失败') }
   dialog.visible = true
 }
 
@@ -287,7 +284,7 @@ const handleDetail = async (row) => {
         '设备详情', { confirmButtonText: '关闭' }
       )
     }
-  } catch { /* ignore */ }
+  } catch { ElMessage.error('操作失败') }
 }
 
 const handleStatusChange = async (row, newStatus, oldStatus) => {
@@ -331,7 +328,7 @@ const handleSubmit = async () => {
       fetchData()
       fetchStats()
     }
-  } catch { /* ignore */ }
+  } catch { ElMessage.error('操作失败') }
 }
 
 const resetForm = () => {

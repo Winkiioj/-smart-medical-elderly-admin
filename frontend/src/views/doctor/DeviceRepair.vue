@@ -1,5 +1,4 @@
 <template>
-  <DeviceLayout>
   <div class="device-repair">
     <el-breadcrumb separator="/">
       <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
@@ -45,14 +44,12 @@
       </p>
     </el-card>
   </div>
-  </DeviceLayout>
 </template>
 
 <script setup>
 import { ref, reactive } from 'vue'
 import { ElMessage } from 'element-plus'
 import { getDevicePage, submitRepair } from '@/api/device'
-import DeviceLayout from '@/components/DeviceLayout.vue'
 
 const formRef = ref(null)
 const devices = ref([])
@@ -75,7 +72,7 @@ const fetchDevices = async () => {
   try {
     const res = await getDevicePage({ pageNo: 1, pageSize: 100 })
     if (res.code === 200) devices.value = res.data || []
-  } catch { /* ignore */ }
+  } catch { ElMessage.error('加载设备列表失败') }
 }
 
 const handleSubmit = async () => {

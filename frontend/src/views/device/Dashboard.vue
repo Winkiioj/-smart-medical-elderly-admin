@@ -1,5 +1,4 @@
 <template>
-  <DeviceLayout>
   <div class="device-dashboard">
     <el-breadcrumb separator="/">
       <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
@@ -76,13 +75,11 @@
       </el-col>
     </el-row>
   </div>
-  </DeviceLayout>
 </template>
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
 import { getDeviceDashboard } from '@/api/device'
-import DeviceLayout from '@/components/DeviceLayout.vue'
 
 const loading = ref(false)
 const dashboard = reactive({ stats: {}, repairingDevices: [], expiringDevices: [] })

@@ -1,4 +1,4 @@
-package com.swjtu.smec.common.dto;
+package com.swjtu.smec.dto;
 
 import lombok.Data;
 

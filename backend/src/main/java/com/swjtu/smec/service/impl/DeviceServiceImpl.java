@@ -151,17 +151,18 @@ public class DeviceServiceImpl
 
         // 查询维修中的设备 + 最近日志
         LambdaQueryWrapper<Device> repairWrapper = new LambdaQueryWrapper<>();
-        repairWrapper.eq(Device::getStatus, 3).orderByDesc(Device::getUpdateTime).last("LIMIT 5");
-        java.util.List<Device> repairingDevices = this.baseMapper.selectList(repairWrapper);
+        repairWrapper.eq(Device::getStatus, 3).orderByDesc(Device::getUpdateTime);
+        Page<Device> repairPage = new Page<>(1, 5);
+        java.util.List<Device> repairingDevices = this.baseMapper.selectPage(repairPage, repairWrapper).getRecords();
 
         // 查询质保即将到期设备（30天内）
         LambdaQueryWrapper<Device> warrantyWrapper = new LambdaQueryWrapper<>();
         warrantyWrapper.le(Device::getWarrantyEnd, LocalDate.now().plusDays(30))
                        .ge(Device::getWarrantyEnd, LocalDate.now())
                        .ne(Device::getStatus, 4)  // 排除已报废
-                       .orderByAsc(Device::getWarrantyEnd)
-                       .last("LIMIT 5");
-        java.util.List<Device> expiringDevices = this.baseMapper.selectList(warrantyWrapper);
+                       .orderByAsc(Device::getWarrantyEnd);
+        Page<Device> warrantyPage = new Page<>(1, 5);
+        java.util.List<Device> expiringDevices = this.baseMapper.selectPage(warrantyPage, warrantyWrapper).getRecords();
 
         java.util.Map<String, Object> result = new java.util.LinkedHashMap<>();
         result.put("stats", java.util.Map.of(

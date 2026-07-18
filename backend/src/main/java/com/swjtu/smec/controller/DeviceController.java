@@ -1,7 +1,7 @@
 package com.swjtu.smec.controller;
 
 import com.swjtu.smec.common.annotation.NoToken;
-import com.swjtu.smec.common.dto.RepairRequest;
+import com.swjtu.smec.dto.RepairRequest;
 import com.swjtu.smec.common.result.CommonResult;
 import com.swjtu.smec.entity.Device;
 import com.swjtu.smec.service.DeviceService;

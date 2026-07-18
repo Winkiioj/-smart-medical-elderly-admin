@@ -47,9 +47,18 @@ const routes = [
       // { path: 'health-import', ... },
 
       // ===== C 负责 =====
+      { path: 'warnings', name: 'WarningList', component: () => import('@/views/doctor/WarningList.vue'), meta: { title: '预警记录' } },
+      { path: 'warnings/:id', name: 'WarningDetail', component: () => import('@/views/doctor/WarningDetail.vue'), meta: { title: '预警详情' } },
+      { path: 'followup', name: 'FollowupManage', component: () => import('@/views/doctor/FollowupManage.vue'), meta: { title: '随访管理' } },
+      { path: 'followup/execute/:id', name: 'FollowupExecute', component: () => import('@/views/doctor/FollowupExecute.vue'), meta: { title: '随访执行' } },
+      { path: 'assessment', name: 'AssessmentManage', component: () => import('@/views/doctor/AssessmentManage.vue'), meta: { title: '评估管理' } },
+      { path: 'assessment/create/:id', name: 'AssessmentCreate', component: () => import('@/views/doctor/AssessmentCreate.vue'), meta: { title: '评估报告' } },
+      { path: 'device-dashboard', name: 'DeviceDashboard', component: () => import('@/views/device/Dashboard.vue'), meta: { title: '设备 Dashboard' } },
+      { path: 'devices', name: 'DeviceManage', component: () => import('@/views/device/DeviceManage.vue'), meta: { title: '设备台账' } },
+      { path: 'tags', name: 'TagManage', component: () => import('@/views/device/TagManage.vue'), meta: { title: '标签管理' } },
+      { path: 'device-repair', name: 'DeviceRepair', component: () => import('@/views/doctor/DeviceRepair.vue'), meta: { title: '设备报修' } },
       // { path: 'warnings', ... },
       // { path: 'followup', ... },
-      // { path: 'devices', ... },
     ],
   },
   // ===== A 负责：机构管理员 + 社区管理员 =====
@@ -70,12 +79,6 @@ const routes = [
   // { path: '/warnings',        component: () => import('@/views/doctor/WarningList.vue'), meta: { title: '预警记录' } },  // TODO: C 创建 WarningList.vue 后解注释
   // { path: '/followup',        component: () => import('@/views/doctor/FollowupManage.vue') },
   // { path: '/assessment',      component: () => import('@/views/doctor/AssessmentManage.vue') },
-
-  // C 的设备管理布局（临时，等 A 统一框架后合并）
-  { path: '/device-dashboard', component: () => import('@/views/device/Dashboard.vue') },
-  { path: '/devices',         component: () => import('@/views/device/DeviceManage.vue') },
-  { path: '/tags',            component: () => import('@/views/device/TagManage.vue') },
-  { path: '/device-repair',   component: () => import('@/views/doctor/DeviceRepair.vue') },
 
   // 404
   {
