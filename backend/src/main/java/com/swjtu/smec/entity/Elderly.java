@@ -50,6 +50,37 @@ public class Elderly {
     private Integer status;           // 0=离院 1=在院
 
     private Long createBy;            // 创建人ID
+    private String name;
+
+    private String idCard;
+
+    private Integer gender;         // 1=男 2=女
+
+    private LocalDate birthDate;
+
+    private Integer age;
+
+    private String phone;
+
+    private String address;
+
+    private String community;
+
+    private Long doctorId;          // 签约医生ID
+
+    private LocalDate admissionDate;
+
+    private String emergencyContact;
+
+    private String emergencyPhone;
+
+    private String medicalHistory;
+
+    private String remark;
+
+    private Integer status;         // 1=正常
+
+    private Long createBy;
 
     @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createTime;
