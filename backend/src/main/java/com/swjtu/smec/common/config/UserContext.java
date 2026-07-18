@@ -48,4 +48,19 @@ public class UserContext {
         JSONObject user = currentUser();
         return user != null ? user.getString("community") : null;
     }
+
+    /** 当前用户首位角色编码（ORG_ADMIN/COM_ADMIN/DOCTOR/DEVICE_ADMIN） */
+    public static String currentRoleCode() {
+        JSONObject user = currentUser();
+        return user != null ? user.getString("roleCode") : null;
+    }
+
+    /** 是否角色（支持多角色，逗号分隔或单值） */
+    public static boolean hasRole(String roleCode) {
+        JSONObject user = currentUser();
+        if (user == null) return false;
+        String codes = user.getString("roleCode");
+        if (codes == null) return false;
+        return codes.contains(roleCode);
+    }
 }

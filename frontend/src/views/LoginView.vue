@@ -63,6 +63,14 @@ const username = ref('')
 const password = ref('')
 const loading = ref(false)
 
+// 角色 → 首页路由映射
+const ROLE_HOME = {
+  ORG_ADMIN: '/dashboard',
+  COM_ADMIN: '/dashboard',
+  DOCTOR: '/doctor-dashboard',
+  DEVICE_ADMIN: '/device-dashboard',
+}
+
 const handleLogin = async () => {
   if (!username.value || !password.value) {
     ElMessage.warning('请输入用户名和密码')
@@ -75,9 +83,15 @@ const handleLogin = async () => {
       method: 'post',
       data: { username: username.value, password: password.value },
     })
-    setStorage('Token', res.data.token)
-    ElMessage.success('登录成功！')
-    router.push('/dashboard')
+    const data = res.data
+    setStorage('Token', data.token)
+    setStorage('RoleCode', data.roleCode || '')
+    setStorage('RoleName', data.roleName || '')
+    setStorage('RealName', data.realName || '')
+    setStorage('Community', data.community || '')
+    ElMessage.success(`登录成功！欢迎 ${data.roleName || ''}`)
+    const home = ROLE_HOME[data.roleCode] || '/dashboard'
+    router.push(home)
   } catch (err) {
     // request.js 已处理
   } finally {

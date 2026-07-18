@@ -1,101 +1,159 @@
 <template>
   <div class="dashboard">
-    <!-- 统计卡片行 -->
-    <el-row :gutter="20">
-      <el-col :span="4" v-for="c in cards" :key="c.label">
-        <el-card shadow="hover" :body-style="{ padding: '20px', cursor: c.link ? 'pointer' : 'default' }"
-          @click="c.link && $router.push(c.link)">
-          <div class="stat-card">
-            <div class="stat-icon" :style="{ background: c.bg }">
-              <el-icon size="28" :color="c.color"><component :is="c.icon" /></el-icon>
-            </div>
-            <div class="stat-text">
-              <div class="stat-number" :class="{ 'text-danger': c.danger && c.val > 0 }">{{ c.val }}</div>
-              <div class="stat-label">{{ c.label }}</div>
-            </div>
+    <h2 style="margin-bottom: 20px">{{ isComAdmin ? (data.community || '本社区') + ' — 工作台' : '全局工作台' }}</h2>
+
+    <!-- ===== 机构管理员：全局四卡片 ===== -->
+    <el-row v-if="isOrgAdmin" :gutter="20">
+      <el-col :span="6">
+        <el-card shadow="hover"><div class="stat-card">
+          <div class="stat-icon" style="background:#e6f7ff"><el-icon size="28" color="#409eff"><OfficeBuilding /></el-icon></div>
+          <div class="stat-text"><div class="stat-number">{{ data.communityCount }}</div><div class="stat-label">接入社区</div></div>
+        </div></el-card>
+      </el-col>
+      <el-col :span="6">
+        <el-card shadow="hover"><div class="stat-card">
+          <div class="stat-icon" style="background:#f6ffed"><el-icon size="28" color="#67c23a"><User /></el-icon></div>
+          <div class="stat-text"><div class="stat-number">{{ data.elderlyTotal }}</div><div class="stat-label">在院老人总数</div></div>
+        </div></el-card>
+      </el-col>
+      <el-col :span="6">
+        <el-card shadow="hover"><div class="stat-card">
+          <div class="stat-icon" style="background:#fff7e6"><el-icon size="28" color="#e6a23c"><UserFilled /></el-icon></div>
+          <div class="stat-text"><div class="stat-number">{{ data.doctorTotal }}</div><div class="stat-label">签约医生</div></div>
+        </div></el-card>
+      </el-col>
+      <el-col :span="6">
+        <el-card shadow="hover"><div class="stat-card">
+          <div class="stat-icon" style="background:#fef0f0"><el-icon size="28" color="#f56c6c"><Monitor /></el-icon></div>
+          <div class="stat-text"><div class="stat-number">{{ data.deviceOnlineRate }}<span class="unit">%</span></div><div class="stat-label">设备在线率</div></div>
+        </div></el-card>
+      </el-col>
+    </el-row>
+
+    <!-- ===== 社区管理员：本社区四卡片 ===== -->
+    <el-row v-if="isComAdmin" :gutter="20">
+      <el-col :span="6">
+        <el-card shadow="hover"><div class="stat-card">
+          <div class="stat-icon" style="background:#e6f7ff"><el-icon size="28" color="#409eff"><User /></el-icon></div>
+          <div class="stat-text"><div class="stat-number">{{ data.elderlyTotal }}</div><div class="stat-label">在院老人</div></div>
+        </div></el-card>
+      </el-col>
+      <el-col :span="6">
+        <el-card shadow="hover"><div class="stat-card">
+          <div class="stat-icon" style="background:#f6ffed"><el-icon size="28" color="#67c23a"><Plus /></el-icon></div>
+          <div class="stat-text"><div class="stat-number">{{ data.newThisMonth }}</div><div class="stat-label">本月新增老人</div></div>
+        </div></el-card>
+      </el-col>
+      <el-col :span="6">
+        <el-card shadow="hover"><div class="stat-card">
+          <div class="stat-icon" style="background:#fff7e6"><el-icon size="28" color="#e6a23c"><WarningFilled /></el-icon></div>
+          <div class="stat-text"><div class="stat-number">{{ data.pendingWarnings }}</div><div class="stat-label">待处理预警</div></div>
+        </div></el-card>
+      </el-col>
+      <el-col :span="6">
+        <el-card shadow="hover"><div class="stat-card">
+          <div class="stat-icon" style="background:#fef0f0"><el-icon size="28" color="#f56c6c"><Monitor /></el-icon></div>
+          <div class="stat-text"><div class="stat-number">{{ data.deviceOnlineRate }}<span class="unit">%</span></div><div class="stat-label">设备在线率</div></div>
+        </div></el-card>
+      </el-col>
+    </el-row>
+
+    <!-- ===== 机构管理员：各社区对标表 + 快捷入口 ===== -->
+    <el-row v-if="isOrgAdmin" :gutter="20" style="margin-top:20px">
+      <el-col :span="16">
+        <el-card shadow="hover">
+          <template #header><span style="font-weight:bold">各社区概况</span></template>
+          <el-table :data="data.communityOverview" stripe size="small" v-loading="loading">
+            <el-table-column prop="community" label="社区" />
+            <el-table-column prop="elderly" label="在院老人" align="center" />
+            <el-table-column prop="doctors" label="签约医生" align="center" />
+            <el-table-column label="待处理预警" align="center">
+              <template #default="{ row }">
+                <el-tag :type="row.warnings > 0 ? 'danger' : 'success'" size="small">{{ row.warnings }}</el-tag>
+              </template>
+            </el-table-column>
+            <el-table-column label="操作" align="center" width="100">
+              <template #default="{ row }">
+                <el-button size="small" type="primary" link @click="$router.push('/reports'); setTimeout(() => viewCommunityFromDash(row.community), 300)">
+                  详情
+                </el-button>
+              </template>
+            </el-table-column>
+          </el-table>
+          <el-empty v-if="!data.communityOverview?.length" description="暂无社区数据" :image-size="60" />
+        </el-card>
+      </el-col>
+      <el-col :span="8">
+        <el-card shadow="hover">
+          <template #header><span style="font-weight:bold">快捷入口</span></template>
+          <div class="shortcut" @click="$router.push('/communities')">
+            <el-icon size="24" color="#409eff"><OfficeBuilding /></el-icon><span>社区管理</span>
+          </div>
+          <div class="shortcut" @click="$router.push('/reports')">
+            <el-icon size="24" color="#e6a23c"><Document /></el-icon><span>报表统计</span>
           </div>
         </el-card>
       </el-col>
     </el-row>
 
-    <!-- 图表行 -->
-    <el-row :gutter="20" style="margin-top:20px">
-      <el-col :span="16">
-        <el-card><div class="chart-title">近30天新增老人趋势</div>
-          <div ref="trendChart" style="height:240px"></div>
-        </el-card>
+    <!-- ===== 社区管理员：快捷入口 ===== -->
+    <el-row v-if="isComAdmin" :gutter="20" style="margin-top:20px">
+      <el-col :span="8">
+        <div class="shortcut-card" @click="$router.push('/doctors')">
+          <el-icon size="24" color="#409eff"><UserFilled /></el-icon><span>医生管理</span>
+        </div>
       </el-col>
       <el-col :span="8">
-        <el-card><div class="chart-title">老人年龄分布</div>
-          <div ref="ageChart" style="height:240px"></div>
-        </el-card>
+        <div class="shortcut-card" @click="$router.push('/assign')">
+          <el-icon size="24" color="#67c23a"><Connection /></el-icon><span>老人分配</span>
+        </div>
+      </el-col>
+      <el-col :span="8">
+        <div class="shortcut-card" @click="$router.push('/reports')">
+          <el-icon size="24" color="#e6a23c"><Document /></el-icon><span>本社区报表</span>
+        </div>
       </el-col>
     </el-row>
   </div>
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, nextTick } from 'vue'
-import { User, Plus, Monitor, WarningFilled, Bell } from '@element-plus/icons-vue'
-import request from '@/utils/request.js'
-import * as echarts from 'echarts'
+import { computed, reactive, ref, onMounted } from 'vue'
+import { User, Plus, WarningFilled, Monitor, UserFilled, Connection, Document, OfficeBuilding } from '@element-plus/icons-vue'
+import { getStorage } from '@/utils/localStorage.js'
+import { getDashboard } from '@/api/reports.js'
 
-const cards = reactive([
-  { val: 0, label: '负责老人',     icon: User,          color: '#409EFF', bg: '#e6f7ff', link: '/elderly',      danger: false },
-  { val: 0, label: '本月新增',     icon: Plus,          color: '#67C23A', bg: '#f6ffed', link: '/elderly-new',  danger: false },
-  { val: '——', label: '设备在线率', icon: Monitor,       color: '#E6A23C', bg: '#fff7e6', link: '',              danger: false },
-  { val: 0, label: '待处理预警',   icon: WarningFilled,  color: '#E6A23C', bg: '#fff7e6', link: '/warnings',      danger: true  },
-  { val: 0, label: '未读消息',     icon: Bell,          color: '#F56C6C', bg: '#fef0f0', link: '',              danger: true  },
-])
+const roleCode = computed(() => getStorage('RoleCode') || '')
+const isOrgAdmin = computed(() => roleCode.value === 'ORG_ADMIN')
+const isComAdmin = computed(() => roleCode.value === 'COM_ADMIN')
 
-const trendChart = ref(null)
-const ageChart = ref(null)
+const loading = ref(false)
+const data = reactive({ communityOverview: [] })
+
+const viewCommunityFromDash = (com) => {
+  // 通过 localStorage 传递社区名给 ReportsView
+  localStorage.setItem('_viewCommunity', com)
+}
 
 onMounted(async () => {
+  loading.value = true
   try {
-    const { data } = await request({ url: '/api/doctor/dashboard?doctorId=3', method: 'get' })
-    cards[0].val = data.totalElderly ?? 0
-    cards[1].val = data.newThisMonth ?? 0
-    cards[2].val = data.deviceOnlineRate ?? '——'
-    cards[3].val = data.pendingWarnings ?? 0
-    cards[4].val = data.unreadMessages ?? 0
-
-    await nextTick()
-    // 趋势图
-    if (trendChart.value) {
-      const c = echarts.init(trendChart.value)
-      c.setOption({
-        tooltip: { trigger: 'axis' },
-        xAxis: { type: 'category', data: data.admissionTrend?.map(d => d.date.substring(5)) },
-        yAxis: { type: 'value', minInterval: 1 },
-        series: [{ type: 'line', data: data.admissionTrend?.map(d => d.count),
-          smooth: true, areaStyle: { color: 'rgba(64,158,255,0.15)' },
-          itemStyle: { color: '#409EFF' }, lineStyle: { width: 2 } }],
-      })
-    }
-    // 年龄饼图
-    if (ageChart.value) {
-      const c = echarts.init(ageChart.value)
-      const ages = data.ageDistribution || {}
-      c.setOption({
-        tooltip: { trigger: 'item', formatter: '{b}: {c}人 ({d}%)' },
-        legend: { bottom: 0 },
-        series: [{
-          type: 'pie', radius: ['45%', '70%'], center: ['50%', '45%'],
-          label: { show: true, formatter: '{b}\n{d}%' },
-          data: Object.entries(ages).map(([k, v]) => ({ name: k, value: v })),
-        }],
-      })
-    }
-  } catch { /* 接口调用失败时使用默认值 */ }
+    const res = await getDashboard()
+    if (res.code === 200) Object.assign(data, res.data)
+  } finally { loading.value = false }
 })
 </script>
 
 <style scoped>
-.stat-card { display: flex; align-items: center; gap: 16px }
-.stat-icon { width: 56px; height: 56px; border-radius: 12px; display: flex; align-items: center; justify-content: center }
-.stat-number { font-size: 28px; font-weight: bold; color: #303133 }
-.stat-number.text-danger { color: #F56C6C }
-.stat-label { font-size: 13px; color: #909399; margin-top: 4px }
-.chart-title { font-size: 14px; color: #606266; margin-bottom: 12px; font-weight: bold }
+.stat-card { display:flex; align-items:center; gap:16px; }
+.stat-icon { width:56px; height:56px; border-radius:12px; display:flex; align-items:center; justify-content:center; }
+.stat-number { font-size:28px; font-weight:bold; color:#303133; }
+.stat-number .unit { font-size:16px; font-weight:normal; color:#909399; }
+.stat-label { font-size:13px; color:#909399; margin-top:4px; }
+.shortcut { display:flex; flex-direction:column; align-items:center; gap:8px; padding:20px; border-radius:8px; cursor:pointer; transition:background .2s; }
+.shortcut:hover { background:#f5f7fa; }
+.shortcut span { font-size:14px; color:#606266; }
+.shortcut-card { display:flex; flex-direction:column; align-items:center; gap:8px; padding:24px; border-radius:8px; cursor:pointer; background:#fff; box-shadow:0 1px 4px rgba(0,0,0,0.06); transition:transform .2s; }
+.shortcut-card:hover { transform:translateY(-2px); box-shadow:0 2px 8px rgba(0,0,0,0.1); }
+.shortcut-card span { font-size:14px; color:#606266; font-weight:500; }
 </style>

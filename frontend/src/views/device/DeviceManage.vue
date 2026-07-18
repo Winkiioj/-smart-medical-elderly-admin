@@ -1,5 +1,4 @@
 <template>
-  <DeviceLayout>
   <div class="device-manage">
     <!-- 面包屑 -->
     <el-breadcrumb separator="/">
@@ -155,14 +154,12 @@
       </template>
     </el-dialog>
   </div>
-  </DeviceLayout>
 </template>
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { getDevicePage, getDeviceDetail, addDevice, updateDevice, updateDeviceStatus, getDeviceStats } from '@/api/device'
-import DeviceLayout from '@/components/DeviceLayout.vue'
 
 // ===== 数据 =====
 const loading = ref(false)

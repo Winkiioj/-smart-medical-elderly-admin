@@ -28,7 +28,7 @@ public class LoginController {
     @NoToken
     @Operation(summary = "用户登录")
     @PostMapping("/login")
-    public CommonResult<Map<String, String>> login(@RequestBody Map<String, String> body) {
+    public CommonResult<Map<String, Object>> login(@RequestBody Map<String, String> body) {
         String username = body.get("username");
         String password = body.get("password");
 
@@ -37,9 +37,8 @@ public class LoginController {
         }
 
         try {
-            String token = sysUserService.login(username, password);
-            Map<String, String> data = Map.of("token", token);
-            return CommonResult.success(data);
+            Map<String, Object> loginResult = sysUserService.login(username, password);
+            return CommonResult.success(loginResult);
         } catch (RuntimeException e) {
             return CommonResult.error(401, e.getMessage());
         }
