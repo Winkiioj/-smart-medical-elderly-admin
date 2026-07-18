@@ -54,7 +54,7 @@ const routes = [
       {
         path: 'doctor-dashboard',
         name: 'DoctorDashboard',
-        component: () => import('@/views/doctor/Dashboard.vue'),
+        component: () => import('@/views/doctor/DoctorDashboard.vue'),
         meta: { title: '医生工作台' },
       },
       {
@@ -110,10 +110,43 @@ const routes = [
         meta: { title: '标签管理' },
       },
 
-      // ===== C 负责：医生端医疗服务（待 C 开发） =====
-      // { path: 'warnings',  component: () => import('@/views/doctor/WarningList.vue') },
-      // { path: 'followup',  component: () => import('@/views/doctor/FollowupManage.vue') },
-      // { path: 'assessment', component: () => import('@/views/doctor/AssessmentManage.vue') },
+      // ===== C 负责：医生端医疗服务 =====
+      {
+        path: 'warnings',
+        name: 'WarningList',
+        component: () => import('@/views/doctor/WarningList.vue'),
+        meta: { title: '预警记录' },
+      },
+      {
+        path: 'warning/:id',
+        name: 'WarningDetail',
+        component: () => import('@/views/doctor/WarningDetail.vue'),
+        meta: { title: '预警详情' },
+      },
+      {
+        path: 'followup',
+        name: 'FollowupManage',
+        component: () => import('@/views/doctor/FollowupManage.vue'),
+        meta: { title: '随访管理' },
+      },
+      {
+        path: 'followup/execute',
+        name: 'FollowupExecute',
+        component: () => import('@/views/doctor/FollowupExecute.vue'),
+        meta: { title: '执行随访' },
+      },
+      {
+        path: 'assessment',
+        name: 'AssessmentManage',
+        component: () => import('@/views/doctor/AssessmentManage.vue'),
+        meta: { title: '评估报告' },
+      },
+      {
+        path: 'assessment/create',
+        name: 'AssessmentCreate',
+        component: () => import('@/views/doctor/AssessmentCreate.vue'),
+        meta: { title: '新建评估' },
+      },
     ],
   },
 

@@ -74,6 +74,18 @@
             <el-icon><Tools /></el-icon>
             <span>设备报修</span>
           </el-menu-item>
+          <el-menu-item index="/warnings">
+            <el-icon><Warning /></el-icon>
+            <span>预警记录</span>
+          </el-menu-item>
+          <el-menu-item index="/followup">
+            <el-icon><Calendar /></el-icon>
+            <span>随访管理</span>
+          </el-menu-item>
+          <el-menu-item index="/assessment">
+            <el-icon><DocumentChecked /></el-icon>
+            <span>评估报告</span>
+          </el-menu-item>
         </template>
 
         <!-- ===== 设备管理员 ===== -->
@@ -146,7 +158,7 @@ import { ElMessage } from 'element-plus'
 import {
   DataBoard, UserFilled, Connection, Document,
   User, Plus, Upload, TrendCharts, Tools,
-  Monitor, Setting, Collection, Bell, OfficeBuilding,
+  Monitor, Setting, Collection, Bell, OfficeBuilding, Warning, Calendar, DocumentChecked,
 } from '@element-plus/icons-vue'
 import { getStorage, delStorage } from '@/utils/localStorage.js'
 import { getNotifications, getUnreadCount, markRead, markAllRead } from '@/api/notification.js'
