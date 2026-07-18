@@ -26,7 +26,7 @@ public class DeviceMonitorLogServiceImpl
     }
 
     @Override
-    public void logEvent(Long deviceId, Integer eventType, Integer oldStatus, Integer newStatus, String message) {
+    public DeviceMonitorLog logEvent(Long deviceId, Integer eventType, Integer oldStatus, Integer newStatus, String message) {
         DeviceMonitorLog log = new DeviceMonitorLog();
         log.setDeviceId(deviceId);
         log.setEventType(eventType);
@@ -35,5 +35,6 @@ public class DeviceMonitorLogServiceImpl
         log.setMessage(message);
         log.setCreateTime(java.time.LocalDateTime.now());
         this.baseMapper.insert(log);
+        return log;
     }
 }

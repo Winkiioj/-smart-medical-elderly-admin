@@ -20,5 +20,5 @@ public interface DeviceMonitorLogService extends IService<DeviceMonitorLog> {
     /**
      * 记录一条事件
      */
-    void logEvent(Long deviceId, Integer eventType, Integer oldStatus, Integer newStatus, String message);
+    DeviceMonitorLog logEvent(Long deviceId, Integer eventType, Integer oldStatus, Integer newStatus, String message);
 }

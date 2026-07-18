@@ -80,6 +80,7 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
 import { getDeviceDashboard } from '@/api/device'
+
 const loading = ref(false)
 const dashboard = reactive({ stats: {}, repairingDevices: [], expiringDevices: [] })
 

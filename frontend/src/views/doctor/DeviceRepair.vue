@@ -72,7 +72,7 @@ const fetchDevices = async () => {
   try {
     const res = await getDevicePage({ pageNo: 1, pageSize: 100 })
     if (res.code === 200) devices.value = res.data || []
-  } catch { /* ignore */ }
+  } catch { ElMessage.error('加载设备列表失败') }
 }
 
 const handleSubmit = async () => {

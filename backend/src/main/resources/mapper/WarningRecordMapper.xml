@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.swjtu.smec.mapper.WarningRecordMapper">
+
+    <select id="selectPageByDoctor" resultType="com.swjtu.smec.entity.WarningRecord">
+        SELECT * FROM warning_record
+        <where>
+            <if test="elderlyIds != null and elderlyIds.size() > 0">
+                AND elderly_id IN
+                <foreach collection="elderlyIds" item="id" open="(" separator="," close=")">
+                    #{id}
+                </foreach>
+            </if>
+            <if test="elderlyIds != null and elderlyIds.size() == 0">
+                AND 1=0
+            </if>
+            <if test="alertLevel != null">
+                AND alert_level = #{alertLevel}
+            </if>
+            <if test="alertType != null and alertType != ''">
+                AND alert_type = #{alertType}
+            </if>
+            <if test="status != null">
+                AND status = #{status}
+            </if>
+            <if test="startTime != null and startTime != ''">
+                AND create_time >= #{startTime}
+            </if>
+            <if test="endTime != null and endTime != ''">
+                AND create_time &lt;= #{endTime}
+            </if>
+        </where>
+        ORDER BY status ASC, create_time DESC
+    </select>
+
+</mapper>

@@ -236,7 +236,7 @@ const fetchStats = async () => {
     if (res.code === 200) {
       Object.assign(stats, res.data)
     }
-  } catch { /* ignore */ }
+  } catch { ElMessage.error('操作失败') }
 }
 
 const handleSearch = () => {
@@ -266,7 +266,7 @@ const handleEdit = async (row) => {
     if (res.code === 200) {
       Object.assign(form, res.data)
     }
-  } catch { /* ignore */ }
+  } catch { ElMessage.error('操作失败') }
   dialog.visible = true
 }
 
@@ -284,7 +284,7 @@ const handleDetail = async (row) => {
         '设备详情', { confirmButtonText: '关闭' }
       )
     }
-  } catch { /* ignore */ }
+  } catch { ElMessage.error('操作失败') }
 }
 
 const handleStatusChange = async (row, newStatus, oldStatus) => {
@@ -328,7 +328,7 @@ const handleSubmit = async () => {
       fetchData()
       fetchStats()
     }
-  } catch { /* ignore */ }
+  } catch { ElMessage.error('操作失败') }
 }
 
 const resetForm = () => {
