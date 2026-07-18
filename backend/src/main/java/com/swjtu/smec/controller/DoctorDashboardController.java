@@ -108,4 +108,16 @@ public class DoctorDashboardController {
 
         return CommonResult.success(data);
     }
+
+    /**
+     * [临时过渡] 预警列表 —— 等 C 完成 WarningController 后删除
+     */
+    @GetMapping("/warnings")
+    public CommonResult<List<Map<String, Object>>> warnings(@RequestParam Long doctorId) {
+        String sql = "SELECT wr.* FROM warning_record wr " +
+                     "JOIN elderly e ON wr.elderly_id = e.id " +
+                     "WHERE e.doctor_id = ? ORDER BY wr.create_time DESC LIMIT 50";
+        List<Map<String, Object>> list = jdbcTemplate.queryForList(sql, doctorId);
+        return CommonResult.success(list);
+    }
 }
