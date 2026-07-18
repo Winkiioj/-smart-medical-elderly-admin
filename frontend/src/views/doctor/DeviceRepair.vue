@@ -1,5 +1,4 @@
 <template>
-  <DeviceLayout>
   <div class="device-repair">
     <el-breadcrumb separator="/">
       <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
@@ -45,14 +44,12 @@
       </p>
     </el-card>
   </div>
-  </DeviceLayout>
 </template>
 
 <script setup>
 import { ref, reactive } from 'vue'
 import { ElMessage } from 'element-plus'
 import { getDevicePage, submitRepair } from '@/api/device'
-import DeviceLayout from '@/components/DeviceLayout.vue'
 
 const formRef = ref(null)
 const devices = ref([])
