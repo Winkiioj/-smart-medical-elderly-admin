@@ -104,8 +104,10 @@ public class InitDataRunner implements CommandLineRunner {
         int count = 0;
         for (SysUser user : users) {
             String pwd = user.getPassword();
+            // 升级 {noop} 标记的明文密码 或 纯明文密码
             if (pwd != null && !pwd.startsWith("$2a$") && !pwd.startsWith("$2b$")) {
-                user.setPassword(passwordEncoder.encode(pwd));
+                String plain = pwd.startsWith("{noop}") ? pwd.substring(6) : pwd;
+                user.setPassword(passwordEncoder.encode(plain));
                 sysUserMapper.updateById(user);
                 count++;
             }

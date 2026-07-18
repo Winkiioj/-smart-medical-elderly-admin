@@ -6,11 +6,11 @@ import com.swjtu.smec.service.HealthRecordService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 健康数据 Controller — UC-DOC-03 + UC-DOC-04
@@ -22,6 +22,9 @@ public class HealthRecordController {
 
     @Autowired
     private HealthRecordService healthRecordService;
+
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
     /**
      * 查某老人的健康数据列表
@@ -91,5 +94,52 @@ public class HealthRecordController {
             @RequestParam String endDate) {
         return CommonResult.success(
                 healthRecordService.getTrend(elderlyId, metricType, startDate, endDate));
+    }
+
+    /**
+     * 获取指标的预警阈值线数据
+     */
+    @Operation(summary = "获取指标预警阈值")
+    @GetMapping("/thresholds")
+    public CommonResult<List<Map<String, Object>>> thresholds(@RequestParam String metricType) {
+        String sql = "SELECT rule_name, indicator_type, min_value, max_value, alert_level " +
+                     "FROM warning_rule WHERE is_enabled = 1 AND indicator_type = ? " +
+                     "ORDER BY alert_level";
+        List<Map<String, Object>> rows = jdbcTemplate.queryForList(sql, metricType);
+
+        List<Map<String, Object>> result = new ArrayList<>();
+        String[] levelNames = {"", "轻度", "中度", "重度"};
+        String[] colors = {"", "#E6A23C", "#E6A23C", "#F56C6C"};
+
+        for (Map<String, Object> row : rows) {
+            Integer level = (Integer) row.get("alert_level");
+            String levelName = level != null && level < levelNames.length ? levelNames[level] : "";
+            String color = level != null && level < colors.length ? colors[level] : "#E6A23C";
+
+            // max_value: 超过此值触发
+            Object maxObj = row.get("max_value");
+            if (maxObj != null) {
+                Map<String, Object> line = new LinkedHashMap<>();
+                line.put("ruleName", row.get("rule_name"));
+                line.put("alertLevelName", levelName);
+                line.put("color", color);
+                line.put("value", ((Number) maxObj).doubleValue());
+                line.put("direction", "max");
+                result.add(line);
+            }
+
+            // min_value: 低于此值触发（如血氧）
+            Object minObj = row.get("min_value");
+            if (minObj != null) {
+                Map<String, Object> line = new LinkedHashMap<>();
+                line.put("ruleName", row.get("rule_name"));
+                line.put("alertLevelName", levelName);
+                line.put("color", color);
+                line.put("value", ((Number) minObj).doubleValue());
+                line.put("direction", "min");
+                result.add(line);
+            }
+        }
+        return CommonResult.success(result);
     }
 }

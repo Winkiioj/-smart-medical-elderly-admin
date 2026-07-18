@@ -486,3 +486,21 @@ CREATE TABLE `notification` (
 -- ALTER TABLE `followup_plan` ADD CONSTRAINT `fk_plan_elderly` FOREIGN KEY (`elderly_id`) REFERENCES `elderly`(`id`);
 -- ALTER TABLE `followup_record` ADD CONSTRAINT `fk_record_plan` FOREIGN KEY (`plan_id`) REFERENCES `followup_plan`(`id`);
 -- ALTER TABLE `followup_record` ADD CONSTRAINT `fk_record_elderly` FOREIGN KEY (`elderly_id`) REFERENCES `elderly`(`id`);
+
+-- ============================================================
+-- 表 22：community — 社区表（A 2026-07-18 新增）
+-- ============================================================
+DROP TABLE IF EXISTS `community`;
+CREATE TABLE `community` (
+    `id`            BIGINT       NOT NULL AUTO_INCREMENT COMMENT '主键',
+    `name`          VARCHAR(100) NOT NULL                COMMENT '社区名称',
+    `address`       VARCHAR(255) DEFAULT NULL            COMMENT '社区地址',
+    `contact_name`  VARCHAR(50)  DEFAULT NULL            COMMENT '联系人姓名',
+    `contact_phone` VARCHAR(20)  DEFAULT NULL            COMMENT '联系人电话',
+    `status`        TINYINT      DEFAULT 1               COMMENT '0停用 1启用',
+    `remark`        VARCHAR(500) DEFAULT NULL            COMMENT '备注',
+    `create_time`   DATETIME     DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_time`   DATETIME     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uk_name` (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='社区表';

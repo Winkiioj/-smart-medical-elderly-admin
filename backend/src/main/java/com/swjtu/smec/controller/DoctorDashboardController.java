@@ -5,11 +5,11 @@ import com.swjtu.smec.common.result.CommonResult;
 import com.swjtu.smec.entity.Elderly;
 import com.swjtu.smec.service.DeviceService;
 import com.swjtu.smec.service.ElderlyService;
+import com.swjtu.smec.service.NotificationService;
 import com.swjtu.smec.service.WarningRecordService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -30,7 +30,7 @@ public class DoctorDashboardController {
     private WarningRecordService warningRecordService;
 
     @Autowired
-    private JdbcTemplate jdbcTemplate;
+    private NotificationService notificationService;
 
     @GetMapping("/dashboard")
     public CommonResult<Map<String, Object>> dashboard(@RequestParam Long doctorId) {
@@ -74,12 +74,9 @@ public class DoctorDashboardController {
             data.put("pendingWarnings", 0);
         }
 
-        // 5. 未读消息 —— TODO: A 创建 NotificationService 后替换为跨域 Service 调用
+        // 5. 未读消息 —— 跨域调用 A 自己的 NotificationService
         try {
-            Integer unread = jdbcTemplate.queryForObject(
-                "SELECT COUNT(*) FROM notification WHERE user_id = ? AND is_read = 0",
-                Integer.class, doctorId);
-            data.put("unreadMessages", unread != null ? unread : 0);
+            data.put("unreadMessages", notificationService.countUnreadByUserId(doctorId));
         } catch (Exception e) {
             data.put("unreadMessages", 0);
         }
@@ -110,5 +107,17 @@ public class DoctorDashboardController {
         data.put("admissionTrend", trend);
 
         return CommonResult.success(data);
+    }
+
+    /**
+     * [临时过渡] 预警列表 —— 等 C 完成 WarningController 后删除
+     */
+    @GetMapping("/warnings")
+    public CommonResult<List<Map<String, Object>>> warnings(@RequestParam Long doctorId) {
+        String sql = "SELECT wr.* FROM warning_record wr " +
+                     "JOIN elderly e ON wr.elderly_id = e.id " +
+                     "WHERE e.doctor_id = ? ORDER BY wr.create_time DESC LIMIT 50";
+        List<Map<String, Object>> list = jdbcTemplate.queryForList(sql, doctorId);
+        return CommonResult.success(list);
     }
 }
