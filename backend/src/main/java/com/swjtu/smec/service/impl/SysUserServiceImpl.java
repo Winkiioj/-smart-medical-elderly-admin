@@ -8,6 +8,7 @@ import com.swjtu.smec.entity.SysUserRole;
 import com.swjtu.smec.mapper.SysUserMapper;
 import com.swjtu.smec.mapper.SysUserRoleMapper;
 import com.swjtu.smec.service.SysUserService;
+import com.swjtu.smec.service.WarningRecordService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -35,6 +36,9 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser>
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
+
+    @Autowired
+    private WarningRecordService warningRecordService;
 
     private static final Duration TOKEN_TTL = Duration.ofHours(8);
     private static final Long DOCTOR_ROLE_ID = 3L;
@@ -175,12 +179,8 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser>
             jdbcTemplate.update(
                 "UPDATE elderly SET doctor_id = NULL WHERE doctor_id = ? AND is_deleted = 0",
                 doctorId);
-            // 关闭该医生负责的待处理预警（通过 handler_id + elderly 表关联）
-            jdbcTemplate.update(
-                "UPDATE warning_record SET status = 3 WHERE status = 0 " +
-                "AND (handler_id = ? OR elderly_id IN " +
-                "(SELECT id FROM elderly WHERE doctor_id = ? AND is_deleted = 0))",
-                doctorId, doctorId);
+            // 关闭该医生负责的待处理预警（跨域调用 C 的 WarningRecordService）
+            warningRecordService.closePendingByDoctorId(doctorId);
         }
     }
 

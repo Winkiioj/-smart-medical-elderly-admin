@@ -67,7 +67,7 @@ const routes = [
   { path: '/health-trend',    component: () => import('@/views/doctor/HealthTrend.vue'), meta: { title: '趋势图' }  },
 
   // ===== C 负责：社区医生 — 医疗服务 + 设备管理 =====
-  { path: '/warnings',        component: () => import('@/views/doctor/WarningList.vue'), meta: { title: '预警记录' }  },  // B 临时过渡页
+  // { path: '/warnings',        component: () => import('@/views/doctor/WarningList.vue'), meta: { title: '预警记录' } },  // TODO: C 创建 WarningList.vue 后解注释
   // { path: '/followup',        component: () => import('@/views/doctor/FollowupManage.vue') },
   // { path: '/assessment',      component: () => import('@/views/doctor/AssessmentManage.vue') },
 

@@ -3,7 +3,9 @@ package com.swjtu.smec.controller;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.swjtu.smec.common.result.CommonResult;
 import com.swjtu.smec.entity.Elderly;
+import com.swjtu.smec.service.DeviceService;
 import com.swjtu.smec.service.ElderlyService;
+import com.swjtu.smec.service.WarningRecordService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +22,12 @@ public class DoctorDashboardController {
 
     @Autowired
     private ElderlyService elderlyService;
+
+    @Autowired
+    private DeviceService deviceService;
+
+    @Autowired
+    private WarningRecordService warningRecordService;
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
@@ -43,14 +51,15 @@ public class DoctorDashboardController {
                 .count();
         data.put("newThisMonth", (int) newThisMonth);
 
-        // 3. 设备在线率 —— 查询 device 表
+        // 3. 设备在线率 —— 跨域调用 C 的 DeviceService
         try {
-            Integer totalDevices = jdbcTemplate.queryForObject(
-                "SELECT COUNT(*) FROM device WHERE community IS NOT NULL", Integer.class);
-            Integer onlineDevices = jdbcTemplate.queryForObject(
-                "SELECT COUNT(*) FROM device WHERE community IS NOT NULL AND status = 1", Integer.class);
-            if (totalDevices != null && totalDevices > 0 && onlineDevices != null) {
-                data.put("deviceOnlineRate", onlineDevices * 100 / totalDevices + "%");
+            com.swjtu.smec.common.result.CommonResult statsResult = deviceService.getStats();
+            @SuppressWarnings("unchecked")
+            Map<String, Object> stats = (Map<String, Object>) statsResult.getData();
+            if (stats != null) {
+                int total = (int) stats.get("total");
+                int online = (int) stats.get("online");
+                data.put("deviceOnlineRate", total > 0 ? (online * 100 / total) + "%" : "——");
             } else {
                 data.put("deviceOnlineRate", "——");
             }
@@ -58,19 +67,14 @@ public class DoctorDashboardController {
             data.put("deviceOnlineRate", "——");
         }
 
-        // 4. 待处理预警（通过 elderly 关联查 doctor_id）
+        // 4. 待处理预警 —— 跨域调用 C 的 WarningRecordService
         try {
-            Integer pending = jdbcTemplate.queryForObject(
-                "SELECT COUNT(*) FROM warning_record wr " +
-                "JOIN elderly e ON wr.elderly_id = e.id " +
-                "WHERE e.doctor_id = ? AND wr.status IN (0, 1)",
-                Integer.class, doctorId);
-            data.put("pendingWarnings", pending != null ? pending : 0);
+            data.put("pendingWarnings", warningRecordService.countPendingByDoctorId(doctorId));
         } catch (Exception e) {
             data.put("pendingWarnings", 0);
         }
 
-        // 5. 未读消息
+        // 5. 未读消息 —— TODO: A 创建 NotificationService 后替换为跨域 Service 调用
         try {
             Integer unread = jdbcTemplate.queryForObject(
                 "SELECT COUNT(*) FROM notification WHERE user_id = ? AND is_read = 0",

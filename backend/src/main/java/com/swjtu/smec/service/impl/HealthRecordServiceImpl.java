@@ -7,14 +7,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.swjtu.smec.entity.Elderly;
 import com.swjtu.smec.entity.HealthRecord;
 import com.swjtu.smec.entity.ImportLog;
-import com.swjtu.smec.entity.WarningRule;
 import com.swjtu.smec.entity.WarningRecord;
 import com.swjtu.smec.mapper.HealthRecordMapper;
-import com.swjtu.smec.mapper.WarningRuleMapper;
-import com.swjtu.smec.mapper.WarningRecordMapper;
 import com.swjtu.smec.service.ElderlyService;
 import com.swjtu.smec.service.HealthRecordService;
 import com.swjtu.smec.service.ImportLogService;
+import com.swjtu.smec.service.WarningRuleService;
+import com.swjtu.smec.service.WarningRecordService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,10 +37,10 @@ public class HealthRecordServiceImpl extends ServiceImpl<HealthRecordMapper, Hea
     private ImportLogService importLogService;
 
     @Autowired
-    private WarningRuleMapper warningRuleMapper;
+    private WarningRuleService warningRuleService;
 
     @Autowired
-    private WarningRecordMapper warningRecordMapper;
+    private WarningRecordService warningRecordService;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -200,26 +199,17 @@ public class HealthRecordServiceImpl extends ServiceImpl<HealthRecordMapper, Hea
             this.saveBatch(toInsert, 500);
         }
 
-        // 3.5 预警规则扫描
-        // 查询所有启用的规则
-        LambdaQueryWrapper<WarningRule> ruleWrapper = new LambdaQueryWrapper<>();
-        ruleWrapper.eq(WarningRule::getIsEnabled, 1);
-        List<WarningRule> rules = warningRuleMapper.selectList(ruleWrapper);
+        // 3.5 预警规则扫描（跨域调用 C 的 WarningRuleService）
+        List<com.swjtu.smec.entity.WarningRule> rules = warningRuleService.listEnabled();
 
         if (!rules.isEmpty() && !toInsert.isEmpty()) {
             for (HealthRecord hr : toInsert) {
                 Long elderlyId = hr.getElderlyId();
                 LocalDate md = hr.getMeasureDate();
 
-                for (WarningRule rule : rules) {
+                for (com.swjtu.smec.entity.WarningRule rule : rules) {
                     // 24h去重：同一老人+同一指标类型已有预警则跳过
-                    Long dupCount = warningRecordMapper.selectCount(
-                        new LambdaQueryWrapper<WarningRecord>()
-                            .eq(WarningRecord::getElderlyId, elderlyId)
-                            .eq(WarningRecord::getAlertType, rule.getIndicatorType())
-                            .ge(WarningRecord::getCreateTime, LocalDateTime.now().minusHours(24))
-                    );
-                    if (dupCount > 0) continue;
+                    if (warningRecordService.existsWithin24h(elderlyId, rule.getIndicatorType())) continue;
 
                     // 阈值比对
                     boolean triggered = false;
@@ -279,7 +269,7 @@ public class HealthRecordServiceImpl extends ServiceImpl<HealthRecordMapper, Hea
                     }
 
                     if (triggered && actualStr != null) {
-                        // 生成预警记录
+                        // 生成预警记录（跨域调用 C 的 WarningRecordService）
                         WarningRecord wr = new WarningRecord();
                         wr.setElderlyId(elderlyId);
                         wr.setRuleId(rule.getId());
@@ -291,8 +281,7 @@ public class HealthRecordServiceImpl extends ServiceImpl<HealthRecordMapper, Hea
                         String thres = maxVal != null ? ">" + maxVal : "<" + minVal;
                         wr.setThresholdValue(thres + rule.getIndicatorName());
                         wr.setStatus(0);
-                        wr.setCreateTime(LocalDateTime.now());
-                        warningRecordMapper.insert(wr);
+                        warningRecordService.create(wr);
                         warningCount++;
                     }
                 }

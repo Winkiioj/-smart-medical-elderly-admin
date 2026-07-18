@@ -8,7 +8,9 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 /**
- * 老人基本信息表
+ * 老人基本信息表 — B 负责
+ *
+ * @author B
  */
 @Data
 @TableName("elderly")
@@ -17,69 +19,55 @@ public class Elderly {
     @TableId(type = IdType.AUTO)
     private Long id;
 
-    private String name;              // 姓名
-
-    private String idCard;            // 身份证号（UK）
-
-    private Integer gender;           // 1=男 2=女（身份证自动解析）
-
-    private LocalDate birthDate;      // 出生日期（身份证自动提取）
-
-    private Integer age;              // 年龄（由birthDate计算）
-
-    private String phone;             // 联系电话
-
-    private String address;           // 居住地址
-
-    private String community;         // 所属社区
-
-    private Long doctorId;            // 签约医生ID → sys_user.id
-
-    private LocalDate admissionDate;  // 入档日期
-
-    private BigDecimal height;        // 身高(cm)
-
-    private String emergencyContact;  // 紧急联系人姓名
-
-    private String emergencyPhone;    // 紧急联系人电话
-
-    private String medicalHistory;    // 既往病史（逗号分隔）
-
-    private String remark;            // 备注
-
-    private Integer status;           // 0=离院 1=在院
-
-    private Long createBy;            // 创建人ID
+    /** 姓名 */
     private String name;
 
+    /** 身份证号（UK） */
     private String idCard;
 
-    private Integer gender;         // 1=男 2=女
+    /** 性别：1=男 2=女（身份证自动解析） */
+    private Integer gender;
 
+    /** 出生日期（身份证自动提取） */
     private LocalDate birthDate;
 
+    /** 年龄（由birthDate计算） */
     private Integer age;
 
+    /** 联系电话 */
     private String phone;
 
+    /** 居住地址 */
     private String address;
 
+    /** 所属社区 */
     private String community;
 
-    private Long doctorId;          // 签约医生ID
+    /** 签约医生ID → sys_user.id */
+    private Long doctorId;
 
+    /** 入档日期 */
     private LocalDate admissionDate;
 
+    /** 身高(cm) */
+    private BigDecimal height;
+
+    /** 紧急联系人姓名 */
     private String emergencyContact;
 
+    /** 紧急联系人电话 */
     private String emergencyPhone;
 
+    /** 既往病史（逗号分隔） */
     private String medicalHistory;
 
+    /** 备注 */
     private String remark;
 
-    private Integer status;         // 1=正常
+    /** 状态：0=离院 1=在院 */
+    private Integer status;
 
+    /** 创建人ID */
     private Long createBy;
 
     @TableField(fill = FieldFill.INSERT)
@@ -89,5 +77,5 @@ public class Elderly {
     private LocalDateTime updateTime;
 
     @TableLogic
-    private Integer isDeleted;        // 0=正常 1=已删除（软删除）
+    private Integer isDeleted;
 }

@@ -29,7 +29,7 @@ service.interceptors.response.use(
         return response.data
       } else if (response.data.code === 401) {
         ElMessage.error(response.data.msg || '登录已失效')
-        router.push({ path: '/' })
+        router.push({ path: '/login' })
         return Promise.reject(new Error('未授权'))
       } else {
         ElMessage.error(response.data.msg || '操作失败')
