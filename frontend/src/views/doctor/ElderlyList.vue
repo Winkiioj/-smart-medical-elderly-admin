@@ -132,7 +132,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { getElderlyList, getElderlyDetail, addElderly, updateElderly } from '@/api/elderly.js'
 import { getTagList, getTagsByElderly } from '@/api/tag.js'
@@ -240,6 +240,11 @@ onMounted(async () => {
     const res = await getTagList()
     tagList.value = res.data || []
   } catch { tagList.value = [] }
+  search()
+})
+
+// 切换 /elderly ↔ /elderly-new 时自动重新查询
+watch(() => route.path, () => {
   search()
 })
 </script>
