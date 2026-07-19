@@ -72,7 +72,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { getElderlyList, getElderlyDetail, addElderly, updateElderly } from '@/api/elderly.js'
 import { ElMessage } from 'element-plus'
@@ -80,8 +80,8 @@ import { ElMessage } from 'element-plus'
 const route = useRoute()
 const keyword = ref(''), community = ref(''), page = ref(1), size = ref(20), total = ref(0)
 const list = ref([]), loading = ref(false)
-const isNewFilter = route.meta?.filter === 'new'
-const title = ref(isNewFilter ? '本月新增老人' : '老人档案管理')
+const isNewFilter = computed(() => route.meta?.filter === 'new')
+const title = computed(() => isNewFilter.value ? '本月新增老人' : '老人档案管理')
 const rels = ['配偶','子女','父母','兄弟姐妹','其他']
 
 const dialogVisible = ref(false), isEdit = ref(false), formTitle = ref('')
@@ -93,7 +93,7 @@ const search = async () => {
   loading.value = true
   try {
     const params = { doctorId, keyword: keyword.value, community: community.value, page: page.value, size: size.value }
-    if (isNewFilter) {
+    if (isNewFilter.value) {
       const now = new Date()
       params.startDate = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().substring(0, 10)
       params.endDate = now.toISOString().substring(0, 10)

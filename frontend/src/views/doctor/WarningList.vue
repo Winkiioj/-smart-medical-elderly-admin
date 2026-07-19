@@ -50,7 +50,7 @@
         <el-table-column prop="createTime" label="触发时间" width="160" />
         <el-table-column label="操作" width="140">
           <template #default="{ row }">
-            <el-button size="small" type="primary" @click="$router.push(`/warnings/${row.id}`)">详情</el-button>
+            <el-button size="small" type="primary" @click="$router.push(`/warning/${row.id}`)">详情</el-button>
           </template>
         </el-table-column>
       </el-table>
