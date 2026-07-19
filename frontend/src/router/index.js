@@ -106,7 +106,7 @@ const routes = [
       {
         path: 'tags',
         name: 'TagManage',
-        component: () => import('@/views/device/TagManage.vue'),
+        component: () => import('@/views/doctor/TagManage.vue'),
         meta: { title: '标签管理' },
       },
 
@@ -130,7 +130,7 @@ const routes = [
         meta: { title: '随访管理' },
       },
       {
-        path: 'followup/execute',
+        path: 'followup/execute/:id',
         name: 'FollowupExecute',
         component: () => import('@/views/doctor/FollowupExecute.vue'),
         meta: { title: '执行随访' },
@@ -142,7 +142,7 @@ const routes = [
         meta: { title: '评估报告' },
       },
       {
-        path: 'assessment/create',
+        path: 'assessment/create/:id',
         name: 'AssessmentCreate',
         component: () => import('@/views/doctor/AssessmentCreate.vue'),
         meta: { title: '新建评估' },

@@ -86,6 +86,10 @@
             <el-icon><DocumentChecked /></el-icon>
             <span>评估报告</span>
           </el-menu-item>
+          <el-menu-item index="/tags">
+            <el-icon><Collection /></el-icon>
+            <span>标签管理</span>
+          </el-menu-item>
         </template>
 
         <!-- ===== 设备管理员 ===== -->
@@ -97,10 +101,6 @@
           <el-menu-item index="/devices">
             <el-icon><Setting /></el-icon>
             <span>设备台账</span>
-          </el-menu-item>
-          <el-menu-item index="/tags">
-            <el-icon><Collection /></el-icon>
-            <span>标签管理</span>
           </el-menu-item>
         </template>
       </el-menu>
