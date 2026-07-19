@@ -36,23 +36,35 @@
       </el-form>
     </el-card>
 
-    <!-- 我的报修记录 -->
+    <!-- 报修记录 -->
     <el-card shadow="hover">
-      <template #header><span style="font-weight: bold">我的报修记录</span></template>
-      <p style="color: #909399; font-size: 13px; margin-bottom: 12px">
-        提示：提交报修后，设备状态将变为"维修中"，设备管理员可在台账列表中查看和处理。
-      </p>
+      <template #header><span style="font-weight: bold">报修记录</span></template>
+      <el-table :data="repairRecords" stripe border v-loading="repairLoading" size="small" style="width:100%">
+        <el-table-column prop="deviceNo" label="设备编号" width="180" />
+        <el-table-column prop="faultType" label="故障类型" width="150" />
+        <el-table-column prop="faultDesc" label="故障描述" min-width="200" show-overflow-tooltip />
+        <el-table-column prop="reporterName" label="报修人" width="100" />
+        <el-table-column prop="repairTime" label="报修时间" width="160" />
+        <el-table-column label="状态" width="90">
+          <template #default="{ row }">
+            <el-tag :type="row.status===3?'warning':'success'" size="small">{{ row.status===3?'维修中':'已修复' }}</el-tag>
+          </template>
+        </el-table-column>
+      </el-table>
+      <p v-if="repairRecords.length===0" style="color:#909399;text-align:center;padding:20px 0">暂无需维修的设备</p>
     </el-card>
   </div>
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
-import { getDevicePage, submitRepair } from '@/api/device'
+import { getDevicePage, submitRepair, getRepairRecords } from '@/api/device'
 
 const formRef = ref(null)
 const devices = ref([])
+const repairRecords = ref([])
+const repairLoading = ref(false)
 const form = reactive({
   deviceId: null,
   faultType: '',
@@ -75,6 +87,15 @@ const fetchDevices = async () => {
   } catch { ElMessage.error('加载设备列表失败') }
 }
 
+const fetchRepairRecords = async () => {
+  repairLoading.value = true
+  try {
+    const res = await getRepairRecords()
+    if (res.code === 200) repairRecords.value = res.data || []
+  } catch { /* ignore */ }
+  finally { repairLoading.value = false }
+}
+
 const handleSubmit = async () => {
   const valid = await formRef.value.validate().catch(() => false)
   if (!valid) return
@@ -84,6 +105,7 @@ const handleSubmit = async () => {
       ElMessage.success('报修已提交，设备状态已变更为维修中')
       Object.assign(form, { deviceId: null, faultType: '', faultDescription: '' })
       formRef.value.resetFields()
+      fetchRepairRecords()
     } else {
       ElMessage.error(res.msg || '提交失败')
     }
@@ -91,4 +113,6 @@ const handleSubmit = async () => {
     ElMessage.error('提交失败，请稍后重试')
   }
 }
+
+onMounted(() => fetchRepairRecords())
 </script>

@@ -80,4 +80,10 @@ public class DeviceController {
     public CommonResult stats() {
         return deviceService.getStats();
     }
+
+    @NoToken
+    @GetMapping("/repair-records")
+    public CommonResult repairRecords() {
+        return deviceService.getRepairRecords();
+    }
 }

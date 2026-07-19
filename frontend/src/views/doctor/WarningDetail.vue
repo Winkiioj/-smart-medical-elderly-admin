@@ -31,12 +31,28 @@
           </el-descriptions>
         </el-card>
 
-        <!-- 操作区 -->
+        <!-- 操作区：待处理 -->
         <el-card shadow="hover" v-if="warning.status === 0">
           <el-button type="primary" @click="handleAccept">接单处理</el-button>
           <el-button type="info" @click="showCloseDialog = true">关闭预警</el-button>
         </el-card>
+
+        <!-- 操作区：处理中 -->
         <el-card shadow="hover" v-if="warning.status === 1">
+          <el-alert type="warning" :closable="false" show-icon style="margin-bottom: 16px">
+            <template #title>已自动生成随访计划（标注"【预警生成】"），请先执行随访</template>
+            <template #default>
+              <el-button type="primary" size="small" style="margin-top:8px" @click="$router.push('/followup')">
+                前往随访管理
+              </el-button>
+            </template>
+          </el-alert>
+
+          <el-divider />
+
+          <div style="color:#909399;font-size:13px;margin-bottom:12px">
+            完成随访后，请在此处填写预警处理结果：
+          </div>
           <el-form :inline="true">
             <el-form-item label="处理意见">
               <el-input v-model="opinion" placeholder="填写核实情况和处理建议" style="width: 280px" maxlength="500" />
@@ -130,7 +146,7 @@ const fetchDetail = async () => {
 const handleAccept = async () => {
   try {
     const res = await acceptWarning(warning.id, 3) // TODO: 真实 handlerId
-    if (res.code === 200) { ElMessage.success('已接单'); fetchDetail() }
+    if (res.code === 200) { ElMessage.success('已接单，随访计划已自动生成。请前往随访管理执行'); fetchDetail() }
     else ElMessage.error(res.msg)
   } catch { ElMessage.error('操作失败') }
 }

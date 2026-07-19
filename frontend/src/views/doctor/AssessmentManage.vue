@@ -9,11 +9,14 @@
       <el-table :data="tableData" stripe border v-loading="loading">
         <el-table-column prop="elderlyId" label="老人ID" width="80" />
         <el-table-column prop="templateId" label="模板ID" width="80" />
-        <el-table-column label="总分" width="80"><template #default="{ row }">{{ row.totalScore }} / {{ row.fullScore }}</template></el-table-column>
-        <el-table-column label="等级" width="90"><template #default="{ row }"><el-tag :type="levelTag(row.scoreLevel)" size="small">{{ row.scoreLevel || '--' }}</el-tag></template></el-table-column>
-        <el-table-column label="状态" width="90"><template #default="{ row }"><el-tag :type="row.status===1?'success':'info'" size="small">{{ row.status===1?'已发布':'草稿' }}</el-tag></template></el-table-column>
+        <el-table-column label="总分" width="90"><template #default="{ row }">{{ row.totalScore || 0 }} / {{ row.fullScore || 0 }}</template></el-table-column>
+        <el-table-column label="等级" width="80"><template #default="{ row }"><el-tag :type="levelTag(row.scoreLevel)" size="small">{{ row.scoreLevel || '--' }}</el-tag></template></el-table-column>
+        <el-table-column label="状态" width="80"><template #default="{ row }"><el-tag :type="row.status===1?'success':'info'" size="small">{{ row.status===1?'已发布':'草稿' }}</el-tag></template></el-table-column>
         <el-table-column prop="createTime" label="创建时间" width="160" />
-        <el-table-column label="操作" width="180">
+        <el-table-column prop="suggestion" label="结论" min-width="200" show-overflow-tooltip>
+          <template #default="{ row }">{{ row.suggestion || '--' }}</template>
+        </el-table-column>
+        <el-table-column label="操作" width="180" fixed="right">
           <template #default="{ row }">
             <el-button v-if="row.status===0" size="small" type="primary" @click="$router.push(`/assessment/create/${row.id}`)">继续评估</el-button>
             <el-button v-else size="small" @click="$router.push(`/assessment/create/${row.id}`)">查看</el-button>
@@ -28,12 +31,12 @@
       <el-form label-width="80px">
         <el-form-item label="选择老人">
           <el-select v-model="createForm.elderlyId" placeholder="请选择老人" filterable style="width:100%">
-            <el-option v-for="e in elderlyList" :key="e.id" :label="`${e.name}（${e.id}）`" :value="e.id" />
+            <el-option v-for="e in elderlyList" :key="e.id" :label="`${e.name} (${e.id})`" :value="e.id" />
           </el-select>
         </el-form-item>
         <el-form-item label="选择模板">
           <el-select v-model="createForm.templateId" placeholder="请选择评估模板" style="width:100%">
-            <el-option v-for="t in templateList" :key="t.id" :label="`${t.templateName}（${t.dimensionCount}维度·满分${t.fullScore}）`" :value="t.id" />
+            <el-option v-for="t in templateList" :key="t.id" :label="`${t.templateName} (${t.dimensionCount}维度·满分${t.fullScore})`" :value="t.id" />
           </el-select>
         </el-form-item>
       </el-form>

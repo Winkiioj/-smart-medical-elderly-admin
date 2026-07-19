@@ -6,7 +6,9 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.swjtu.smec.common.result.CommonResult;
 import com.swjtu.smec.entity.Device;
+import com.swjtu.smec.entity.DeviceMonitorLog;
 import com.swjtu.smec.mapper.DeviceMapper;
+import com.swjtu.smec.mapper.DeviceMonitorLogMapper;
 import com.swjtu.smec.service.DeviceMonitorLogService;
 import com.swjtu.smec.service.DeviceService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +32,9 @@ public class DeviceServiceImpl
 
     @Autowired
     private DeviceMonitorLogService deviceMonitorLogService;
+
+    @Autowired
+    private DeviceMonitorLogMapper deviceMonitorLogMapper;
 
     @Override
     public CommonResult pageList(int pageNo, int pageSize,
@@ -198,6 +203,56 @@ public class DeviceServiceImpl
         String msg = "医生报修[" + reporterName + "]: " + faultType + " — " + faultDesc;
         deviceMonitorLogService.logEvent(deviceId, 4, fromStatus, 3, msg);
         return CommonResult.success(null);
+    }
+
+    @Override
+    public CommonResult getRepairRecords() {
+        LambdaQueryWrapper<DeviceMonitorLog> w = new LambdaQueryWrapper<>();
+        w.like(DeviceMonitorLog::getMessage, "报修")
+         .orderByDesc(DeviceMonitorLog::getCreateTime);
+        Page<DeviceMonitorLog> p = new Page<>(1, 20);
+        java.util.List<DeviceMonitorLog> logs = deviceMonitorLogMapper.selectPage(p, w).getRecords();
+
+        java.util.List<java.util.Map<String, Object>> result = new java.util.ArrayList<>();
+        for (DeviceMonitorLog log : logs) {
+            Device device = this.baseMapper.selectById(log.getDeviceId());
+            if (device == null) continue;
+
+            String msg = log.getMessage() != null ? log.getMessage() : "";
+            String reporter = "";
+            String faultType = "";
+            String faultDesc = "";
+            int endName = msg.indexOf("]: ");
+            if (endName > 0) {
+                int startName = msg.indexOf("[") + 1;
+                reporter = msg.substring(startName, endName);
+                String rest = msg.substring(endName + 3);
+                int dash = rest.indexOf(" — ");
+                if (dash > 0) {
+                    faultType = rest.substring(0, dash);
+                    faultDesc = rest.substring(dash + 3);
+                } else {
+                    faultDesc = rest;
+                }
+            } else {
+                faultDesc = msg;
+            }
+
+            boolean exists = result.stream().anyMatch(m -> m.get("deviceId").equals(device.getId()));
+            if (exists) continue;
+
+            java.util.Map<String, Object> item = new java.util.LinkedHashMap<>();
+            item.put("deviceId", device.getId());
+            item.put("deviceNo", device.getDeviceNo());
+            item.put("deviceName", device.getDeviceName());
+            item.put("status", device.getStatus());
+            item.put("faultType", faultType.isEmpty() ? "其他" : faultType);
+            item.put("faultDesc", faultDesc.isEmpty() ? msg : faultDesc);
+            item.put("reporterName", reporter.isEmpty() ? "未知" : reporter);
+            item.put("repairTime", log.getCreateTime() != null ? log.getCreateTime().toString() : "");
+            result.add(item);
+        }
+        return CommonResult.success(result);
     }
 
     @Override

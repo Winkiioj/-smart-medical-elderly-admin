@@ -118,6 +118,13 @@ public class FollowupPlanServiceImpl
     }
 
     @Override
+    public CommonResult getPlanById(Long planId) {
+        FollowupPlan plan = this.baseMapper.selectById(planId);
+        if (plan == null) return CommonResult.error(404, "计划不存在");
+        return CommonResult.success(plan);
+    }
+
+    @Override
     public CommonResult countCompletedByDoctorId(Long doctorId) {
         LambdaQueryWrapper<FollowupPlan> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(FollowupPlan::getDoctorId, doctorId)

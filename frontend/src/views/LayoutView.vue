@@ -96,7 +96,7 @@
         <template v-if="isDeviceAdmin">
           <el-menu-item index="/device-dashboard">
             <el-icon><Monitor /></el-icon>
-            <span>Dashboard</span>
+            <span>工作台</span>
           </el-menu-item>
           <el-menu-item index="/devices">
             <el-icon><Setting /></el-icon>

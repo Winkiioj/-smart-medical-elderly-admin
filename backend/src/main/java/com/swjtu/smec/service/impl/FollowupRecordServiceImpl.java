@@ -1,5 +1,6 @@
 package com.swjtu.smec.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.swjtu.smec.common.result.CommonResult;
 import com.swjtu.smec.entity.FollowupRecord;
@@ -20,5 +21,15 @@ public class FollowupRecordServiceImpl
     public CommonResult getRecentByElderly(Long elderlyId, int limit) {
         List<FollowupRecord> list = this.baseMapper.selectRecentByElderly(elderlyId, limit);
         return CommonResult.success(list);
+    }
+
+    @Override
+    public CommonResult getByPlanId(Long planId) {
+        LambdaQueryWrapper<FollowupRecord> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(FollowupRecord::getPlanId, planId)
+               .orderByDesc(FollowupRecord::getCreateTime);
+        FollowupRecord record = this.baseMapper.selectOne(wrapper);
+        if (record == null) return CommonResult.success(null);
+        return CommonResult.success(record);
     }
 }

@@ -7,14 +7,17 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.swjtu.smec.common.result.CommonResult;
 import com.swjtu.smec.entity.Elderly;
+import com.swjtu.smec.entity.FollowupPlan;
 import com.swjtu.smec.entity.WarningRecord;
 import com.swjtu.smec.mapper.WarningRecordMapper;
 import com.swjtu.smec.service.ElderlyService;
+import com.swjtu.smec.service.FollowupPlanService;
 import com.swjtu.smec.service.WarningRecordService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -34,6 +37,10 @@ public class WarningRecordServiceImpl
 
     @Autowired
     private ElderlyService elderlyService;
+
+    @Autowired
+    @org.springframework.context.annotation.Lazy
+    private FollowupPlanService followupPlanService;
 
     // ===== 供 B/A 跨域调用 =====
 
@@ -120,6 +127,20 @@ public class WarningRecordServiceImpl
         record.setHandleTime(LocalDateTime.now());
         record.setUpdateTime(LocalDateTime.now());
         this.baseMapper.updateById(record);
+
+        // 自动生成关联随访计划（【预警生成】标记）
+        try {
+            FollowupPlan plan = new FollowupPlan();
+            plan.setElderlyId(record.getElderlyId());
+            plan.setDoctorId(handlerId);
+            plan.setFollowupType(1);
+            plan.setPlanDate(LocalDate.now());
+            plan.setFollowupContent("【预警生成】" + record.getAlertTitle());
+            followupPlanService.create(plan);
+        } catch (Exception e) {
+            // 创建计划失败不影响接单（可能已有同类型未完成计划）
+        }
+
         return CommonResult.success(null);
     }
 

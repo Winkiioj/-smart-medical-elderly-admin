@@ -32,6 +32,12 @@ public class FollowupController {
     // TODO: A 完成登录认证后删除所有 @NoToken
 
     @NoToken
+    @GetMapping("/plan/{id}")
+    public CommonResult planDetail(@PathVariable Long id) {
+        return planService.getPlanById(id);
+    }
+
+    @NoToken
     @GetMapping("/plan/page")
     public CommonResult page(
             @RequestParam(defaultValue = "1") int pageNo,
@@ -72,5 +78,11 @@ public class FollowupController {
     @GetMapping("/record/recent/{elderlyId}")
     public CommonResult recentRecords(@PathVariable Long elderlyId) {
         return recordService.getRecentByElderly(elderlyId, 3);
+    }
+
+    @NoToken
+    @GetMapping("/record/by-plan/{planId}")
+    public CommonResult recordByPlan(@PathVariable Long planId) {
+        return recordService.getByPlanId(planId);
     }
 }

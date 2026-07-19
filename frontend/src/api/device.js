@@ -65,6 +65,11 @@ export const getDeviceDashboard = () => {
   })
 }
 
+// 报修记录
+export const getRepairRecords = () => {
+  return request({ url: '/api/device/repair-records', method: 'get' })
+}
+
 // 医生提交设备报修
 export const submitRepair = (data) => {
   return request({

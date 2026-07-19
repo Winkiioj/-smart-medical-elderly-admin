@@ -24,6 +24,14 @@ export const getRecentRecords = (elderlyId) => {
   return request({ url: `/api/followup/record/recent/${elderlyId}`, method: 'get' })
 }
 
+export const getRecordByPlan = (planId) => {
+  return request({ url: `/api/followup/record/by-plan/${planId}`, method: 'get' })
+}
+
+export const getPlanDetail = (id) => {
+  return request({ url: `/api/followup/plan/${id}`, method: 'get' })
+}
+
 export const getElderlyList = (doctorId) => {
   return request({ url: '/api/followup/elderly-list', method: 'get', params: { doctorId } })
 }

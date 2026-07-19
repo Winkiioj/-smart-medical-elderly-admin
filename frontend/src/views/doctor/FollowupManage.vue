@@ -33,7 +33,7 @@
         <el-table-column prop="elderlyId" label="老人ID" width="80" />
         <el-table-column label="类型" width="80"><template #default="{ row }">{{ typeText(row.followupType) }}</template></el-table-column>
         <el-table-column prop="planDate" label="计划日期" width="120" />
-        <el-table-column label="剩余天数" width="100" align="center">
+        <el-table-column label="剩余天数" width="110" align="center">
           <template #default="{ row }">
             <template v-if="row.status === 2">--</template>
             <el-tag v-else-if="row.status === 3" type="danger" size="small">已逾期</el-tag>
@@ -101,7 +101,7 @@ const statusText = (v) => ({ 0: '待执行', 1: '执行中', 2: '已完成', 3: 
 
 const remainTag = (dateStr) => {
   if (!dateStr) return 'info'
-  const d = Math.floor((new Date(dateStr) - new Date()) / 86400000)
+  const d = calcRemainDays(dateStr)
   if (d < 0) return 'danger'
   if (d === 0) return 'warning'
   if (d <= 3) return 'warning'
@@ -109,10 +109,19 @@ const remainTag = (dateStr) => {
 }
 const remainText = (dateStr) => {
   if (!dateStr) return '--'
-  const d = Math.floor((new Date(dateStr) - new Date()) / 86400000)
+  const d = calcRemainDays(dateStr)
   if (d < 0) return `已逾期 ${-d} 天`
   if (d === 0) return '今天'
   return `还有 ${d} 天`
+}
+
+// 用本地日期计算剩余天数，避免 UTC 时差
+const calcRemainDays = (dateStr) => {
+  const [y, m, d] = dateStr.split('-').map(Number)
+  const plan = new Date(y, m - 1, d)
+  const today = new Date()
+  const localToday = new Date(today.getFullYear(), today.getMonth(), today.getDate())
+  return Math.floor((plan - localToday) / 86400000)
 }
 
 const fetchData = async () => {

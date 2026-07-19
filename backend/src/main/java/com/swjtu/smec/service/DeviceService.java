@@ -59,4 +59,5 @@ public interface DeviceService extends IService<Device> {
      * 按状态统计设备数量
      */
     int countByStatus(Integer status);
+    CommonResult getRepairRecords();
 }

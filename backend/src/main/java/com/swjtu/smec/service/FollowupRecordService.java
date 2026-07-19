@@ -6,4 +6,5 @@ import com.swjtu.smec.entity.FollowupRecord;
 
 public interface FollowupRecordService extends IService<FollowupRecord> {
     CommonResult getRecentByElderly(Long elderlyId, int limit);
+    CommonResult getByPlanId(Long planId);
 }
