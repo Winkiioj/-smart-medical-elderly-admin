@@ -1,8 +1,6 @@
 package com.swjtu.smec.entity;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -21,4 +19,7 @@ public class FollowupPlan {
     private LocalDate nextPlanDate;
     private LocalDateTime createTime;
     private LocalDateTime updateTime;
+
+    @TableField(exist = false)
+    private String elderlyName;
 }

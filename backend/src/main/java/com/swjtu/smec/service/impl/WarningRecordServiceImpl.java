@@ -92,6 +92,11 @@ public class WarningRecordServiceImpl
         Page<WarningRecord> page = new Page<>(pageNo, pageSize);
         IPage<WarningRecord> result = this.baseMapper.selectPageByDoctor(
                 page, elderlyIds, alertLevel, alertType, status, startTime, endTime);
+        // 填充老人姓名
+        for (WarningRecord rec : result.getRecords()) {
+            Elderly e = elderlyService.getById(rec.getElderlyId());
+            if (e != null) rec.setElderlyName(e.getName());
+        }
         return CommonResult.success(result.getRecords(), result.getTotal());
     }
 
@@ -136,9 +141,11 @@ public class WarningRecordServiceImpl
             plan.setFollowupType(1);
             plan.setPlanDate(LocalDate.now());
             plan.setFollowupContent("【预警生成】" + record.getAlertTitle());
-            followupPlanService.create(plan);
+            plan.setStatus(0);
+            plan.setCreateTime(LocalDateTime.now());
+            followupPlanService.save(plan);  // 直接插入，跳过 create() 的去重检查
         } catch (Exception e) {
-            // 创建计划失败不影响接单（可能已有同类型未完成计划）
+            // 创建计划失败不影响接单
         }
 
         return CommonResult.success(null);
