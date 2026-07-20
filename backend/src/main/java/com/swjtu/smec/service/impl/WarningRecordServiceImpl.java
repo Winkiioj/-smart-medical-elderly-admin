@@ -129,16 +129,15 @@ public class WarningRecordServiceImpl
         this.baseMapper.updateById(record);
 
         // 自动生成关联随访计划（【预警生成】标记）
-        try {
-            FollowupPlan plan = new FollowupPlan();
-            plan.setElderlyId(record.getElderlyId());
-            plan.setDoctorId(handlerId);
-            plan.setFollowupType(1);
-            plan.setPlanDate(LocalDate.now());
-            plan.setFollowupContent("【预警生成】" + record.getAlertTitle());
-            followupPlanService.create(plan);
-        } catch (Exception e) {
-            // 创建计划失败不影响接单（可能已有同类型未完成计划）
+        FollowupPlan plan = new FollowupPlan();
+        plan.setElderlyId(record.getElderlyId());
+        plan.setDoctorId(handlerId);
+        plan.setFollowupType(1);
+        plan.setPlanDate(LocalDate.now());
+        plan.setFollowupContent("【预警生成】" + record.getAlertTitle());
+        CommonResult result = followupPlanService.create(plan);
+        if (result.getCode() != 200) {
+            return CommonResult.error(400, "接单成功，但随访计划生成失败：" + result.getMsg());
         }
 
         return CommonResult.success(null);
