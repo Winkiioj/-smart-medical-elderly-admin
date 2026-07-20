@@ -46,6 +46,18 @@
             <el-icon><Document /></el-icon>
             <span>报表统计</span>
           </el-menu-item>
+          <el-menu-item index="/elderly">
+            <el-icon><User /></el-icon>
+            <span>老人档案</span>
+          </el-menu-item>
+          <el-menu-item index="/warnings">
+            <el-icon><Warning /></el-icon>
+            <span>预警记录</span>
+          </el-menu-item>
+          <el-menu-item index="/devices">
+            <el-icon><Setting /></el-icon>
+            <span>设备台账</span>
+          </el-menu-item>
         </template>
 
         <!-- ===== 社区医生 ===== -->
@@ -243,5 +255,9 @@ const handleLogout = () => {
 .header-title { font-size: 16px; color: #303133; }
 .header-right { display: flex; align-items: center; gap: 16px; }
 .user-info { font-size: 14px; color: #606266; }
-.el-main { background: #f0f2f5; padding: 20px; }
+.el-main { background: #f5f7fa; padding: 20px; }
+.el-main .el-card {
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e4e7ed;
+}
 </style>
