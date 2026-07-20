@@ -53,7 +53,7 @@ public interface DeviceService extends IService<Device> {
     /**
      * 设备管理员 Dashboard 聚合数据
      */
-    CommonResult getDashboard();
+    CommonResult getDashboard(int repairPageNo, int repairPageSize);
 
     /**
      * 按状态统计设备数量

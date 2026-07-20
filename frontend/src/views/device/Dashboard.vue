@@ -54,6 +54,16 @@
             </el-table-column>
           </el-table>
           <el-empty v-if="!dashboard.repairingDevices?.length" description="暂无维修中设备" :image-size="60" />
+          <div v-if="dashboard.repairingTotal > repairPageSize" style="margin-top:12px;display:flex;justify-content:flex-end">
+            <el-pagination
+              v-model:current-page="repairPageNo"
+              :page-size="repairPageSize"
+              :total="dashboard.repairingTotal"
+              layout="prev, pager, next"
+              size="small"
+              @current-change="fetchData"
+            />
+          </div>
         </el-card>
       </el-col>
       <el-col :span="12">
@@ -82,7 +92,9 @@ import { ref, reactive, onMounted } from 'vue'
 import { getDeviceDashboard } from '@/api/device'
 
 const loading = ref(false)
-const dashboard = reactive({ stats: {}, repairingDevices: [], expiringDevices: [] })
+const repairPageNo = ref(1)
+const repairPageSize = 8
+const dashboard = reactive({ stats: {}, repairingDevices: [], repairingTotal: 0, expiringDevices: [] })
 
 const warrantyTag = (row) => {
   if (!row.warrantyEnd) return { type: '', text: '' }
@@ -96,7 +108,7 @@ const warrantyTag = (row) => {
 const fetchData = async () => {
   loading.value = true
   try {
-    const res = await getDeviceDashboard()
+    const res = await getDeviceDashboard({ repairPageNo: repairPageNo.value, repairPageSize })
     if (res.code === 200) {
       Object.assign(dashboard, res.data)
     }

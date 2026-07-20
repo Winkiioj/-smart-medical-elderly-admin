@@ -12,13 +12,20 @@
             {{ parseGuide(d.scoringGuide) }}
           </div>
 
-          <!-- 查看模式：显示已保存的维度得分 -->
+          <!-- 查看模式：逐项得分表格 -->
           <template v-if="detail.report?.status === 1">
-            <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0">
-              <span style="color:#606266;font-size:13px">{{ parseGuide(d.scoringGuide) }}</span>
-              <span style="font-weight:bold;font-size:16px">
-                {{ scoreMap[d.id] || 0 }} / {{ d.maxScore }} 分
-              </span>
+            <el-table :data="getItems(d)" border size="small">
+              <el-table-column type="index" label="序号" width="60" align="center" />
+              <el-table-column prop="name" label="评估项目" min-width="200" />
+              <el-table-column label="得分" width="120" align="center">
+                <template #default="{ $index }">
+                  <span style="font-weight:bold">{{ itemScoreMap[d.id]?.[$index] || 0 }}</span>
+                  <span style="color:#909399;font-size:12px;margin-left:4px">/ {{ getPerItemMax(d) }}</span>
+                </template>
+              </el-table-column>
+            </el-table>
+            <div style="margin-top:8px;text-align:right;font-weight:bold;font-size:15px">
+              维度合计：{{ scoreMap[d.id] || 0 }} / {{ d.maxScore }} 分
             </div>
           </template>
 

@@ -58,10 +58,11 @@ export const getDeviceStats = () => {
 }
 
 // 设备管理员 Dashboard
-export const getDeviceDashboard = () => {
+export const getDeviceDashboard = (params) => {
   return request({
     url: '/api/device/dashboard',
     method: 'get',
+    params,
   })
 }
 
