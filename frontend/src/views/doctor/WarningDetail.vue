@@ -31,45 +31,48 @@
           </el-descriptions>
         </el-card>
 
-        <!-- 操作区：待处理 -->
-        <el-card shadow="hover" v-if="warning.status === 0">
-          <el-button type="primary" @click="handleAccept">接单处理</el-button>
-          <el-button type="info" @click="showCloseDialog = true">关闭预警</el-button>
-        </el-card>
+        <!-- 操作区（仅医生可操作） -->
+        <template v-if="isDoctor">
+          <!-- 待处理 -->
+          <el-card shadow="hover" v-if="warning.status === 0">
+            <el-button type="primary" @click="handleAccept">接单处理</el-button>
+            <el-button type="info" @click="showCloseDialog = true">关闭预警</el-button>
+          </el-card>
 
-        <!-- 操作区：处理中 -->
-        <el-card shadow="hover" v-if="warning.status === 1">
-          <el-alert type="warning" :closable="false" show-icon style="margin-bottom: 16px">
-            <template #title>已自动生成随访计划（标注"【预警生成】"），请先执行随访</template>
-            <template #default>
-              <el-button type="primary" size="small" style="margin-top:8px" @click="$router.push('/followup')">
-                前往随访管理
-              </el-button>
-            </template>
-          </el-alert>
+          <!-- 处理中 -->
+          <el-card shadow="hover" v-if="warning.status === 1">
+            <el-alert type="warning" :closable="false" show-icon style="margin-bottom: 16px">
+              <template #title>已自动生成随访计划（标注"【预警生成】"），请先执行随访</template>
+              <template #default>
+                <el-button type="primary" size="small" style="margin-top:8px" @click="$router.push('/followup')">
+                  前往随访管理
+                </el-button>
+              </template>
+            </el-alert>
 
-          <el-divider />
+            <el-divider />
 
-          <div style="color:#909399;font-size:13px;margin-bottom:12px">
-            完成随访后，请在此处填写预警处理结果：
-          </div>
-          <el-form :inline="true">
-            <el-form-item label="处理意见">
-              <el-input v-model="opinion" placeholder="填写核实情况和处理建议" style="width: 280px" maxlength="500" />
-            </el-form-item>
-            <el-form-item label="处理结果">
-              <el-select v-model="result" placeholder="请选择" style="width: 180px">
-                <el-option value="已联系并确认就医" label="已联系并确认就医" />
-                <el-option value="已联系确认为设备误差" label="已联系确认为设备误差" />
-                <el-option value="已安排随访跟进" label="已安排随访跟进" />
-                <el-option value="其他" label="其他" />
-              </el-select>
-            </el-form-item>
-            <el-form-item>
-              <el-button type="success" @click="handleComplete">完成处理</el-button>
-            </el-form-item>
-          </el-form>
-        </el-card>
+            <div style="color:#909399;font-size:13px;margin-bottom:12px">
+              完成随访后，请在此处填写预警处理结果：
+            </div>
+            <el-form :inline="true">
+              <el-form-item label="处理意见">
+                <el-input v-model="opinion" placeholder="填写核实情况和处理建议" style="width: 280px" maxlength="500" />
+              </el-form-item>
+              <el-form-item label="处理结果">
+                <el-select v-model="result" placeholder="请选择" style="width: 180px">
+                  <el-option value="已联系并确认就医" label="已联系并确认就医" />
+                  <el-option value="已联系确认为设备误差" label="已联系确认为设备误差" />
+                  <el-option value="已安排随访跟进" label="已安排随访跟进" />
+                  <el-option value="其他" label="其他" />
+                </el-select>
+              </el-form-item>
+              <el-form-item>
+                <el-button type="success" @click="handleComplete">完成处理</el-button>
+              </el-form-item>
+            </el-form>
+          </el-card>
+        </template>
       </el-col>
 
       <!-- 老人信息 -->
@@ -112,13 +115,15 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { getWarningDetail, acceptWarning, completeWarning, closeWarning } from '@/api/warning'
+import { getStorage } from '@/utils/localStorage.js'
 
 const route = useRoute()
 const router = useRouter()
+const isDoctor = computed(() => getStorage('RoleCode') === 'DOCTOR')
 const loading = ref(false)
 const warning = reactive({})
 const elderly = ref(null)

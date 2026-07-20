@@ -42,7 +42,8 @@
 
     <!-- 操作栏 -->
     <div style="margin-bottom: 16px; display: flex; justify-content: space-between">
-      <el-button type="primary" @click="handleAdd">录入新设备</el-button>
+      <el-button v-if="isDeviceAdmin" type="primary" @click="handleAdd">录入新设备</el-button>
+      <span v-else /> <!-- 占位，保持统计右对齐 -->
       <span style="color: #909399; font-size: 13px">
         在线 <span style="color: #67C23A; font-weight: bold">{{ stats.online }}</span>
         &nbsp;离线 <span style="color: #F56C6C; font-weight: bold">{{ stats.offline }}</span>
@@ -77,21 +78,26 @@
         </el-table-column>
         <el-table-column label="操作" width="240" fixed="right">
           <template #default="{ row }">
-            <el-select
-              v-model="row.status"
-              size="small"
-              style="width: 100px"
-              :disabled="row.status === 4"
-              @visible-change="(visible) => { if (visible) row._prevStatus = row.status }"
-              @change="(val) => handleStatusChange(row, val, row._prevStatus)"
-            >
-              <el-option :value="1" label="在线" />
-              <el-option :value="2" label="离线" />
-              <el-option :value="3" label="维修中" />
-              <el-option :value="4" label="已报废" />
-            </el-select>
-            <el-button size="small" @click="handleDetail(row)">详情</el-button>
-            <el-button size="small" type="warning" @click="handleEdit(row)">编辑</el-button>
+            <template v-if="isDeviceAdmin">
+              <el-select
+                v-model="row.status"
+                size="small"
+                style="width: 100px"
+                :disabled="row.status === 4"
+                @visible-change="(visible) => { if (visible) row._prevStatus = row.status }"
+                @change="(val) => handleStatusChange(row, val, row._prevStatus)"
+              >
+                <el-option :value="1" label="在线" />
+                <el-option :value="2" label="离线" />
+                <el-option :value="3" label="维修中" />
+                <el-option :value="4" label="已报废" />
+              </el-select>
+              <el-button size="small" @click="handleDetail(row)">详情</el-button>
+              <el-button size="small" type="warning" @click="handleEdit(row)">编辑</el-button>
+            </template>
+            <template v-else>
+              <el-button size="small" @click="handleDetail(row)">详情</el-button>
+            </template>
           </template>
         </el-table-column>
       </el-table>
@@ -160,9 +166,12 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { getDevicePage, getDeviceDetail, addDevice, updateDevice, updateDeviceStatus, getDeviceStats } from '@/api/device'
+import { getStorage } from '@/utils/localStorage.js'
+
+const isDeviceAdmin = computed(() => getStorage('RoleCode') === 'DEVICE_ADMIN')
 
 // ===== 数据 =====
 const loading = ref(false)

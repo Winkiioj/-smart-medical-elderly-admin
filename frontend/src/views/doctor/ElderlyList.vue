@@ -2,7 +2,7 @@
   <div class="elderly-list">
     <div class="page-header">
       <h2>{{ title }}</h2>
-      <el-button type="primary" @click="openAdd">+ 新增老人</el-button>
+      <el-button v-if="isDoctor" type="primary" @click="openAdd">+ 新增老人</el-button>
     </div>
 
     <!-- ===== 多维度筛选栏 ===== -->
@@ -82,10 +82,10 @@
             <span v-if="!(elderlyTags[row.id] || []).length" style="color:#ccc">—</span>
           </template>
         </el-table-column>
-        <el-table-column label="操作" fixed="right" width="170">
+        <el-table-column label="操作" fixed="right" :width="isDoctor ? 170 : 100">
           <template #default="{row}">
             <el-button size="small" @click="openDetail(row)">查看</el-button>
-            <el-button size="small" type="primary" @click="openEdit(row)">编辑</el-button>
+            <el-button v-if="isDoctor" size="small" type="primary" @click="openEdit(row)">编辑</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -95,7 +95,7 @@
         @current-change="p => { page = p; search() }" layout="total, prev, pager, next" />
     </el-card>
 
-    <!-- ===== 编辑/新增弹窗（原有逻辑保留） ===== -->
+    <!-- 编辑/新增弹窗（仅医生） -->
     <el-dialog :title="formTitle" v-model="dialogVisible" width="750px" @close="resetForm">
       <el-form :model="form" label-width="90px">
         <el-row :gutter="20">
@@ -128,6 +128,40 @@
       </el-form>
       <template #footer><el-button @click="dialogVisible=false">取消</el-button><el-button type="primary" @click="submitForm">保存</el-button></template>
     </el-dialog>
+
+    <!-- 查看详情弹窗（只读，所有角色可用） -->
+    <el-dialog title="老人档案详情" v-model="detailVisible" width="700px">
+      <template v-if="detail">
+        <el-descriptions :column="2" border size="small">
+          <el-descriptions-item label="姓名">{{ detail.name }}</el-descriptions-item>
+          <el-descriptions-item label="性别">{{ detail.gender === 1 ? '男' : '女' }}</el-descriptions-item>
+          <el-descriptions-item label="年龄">{{ detail.age }} 岁</el-descriptions-item>
+          <el-descriptions-item label="身份证号">{{ detail.idCard }}</el-descriptions-item>
+          <el-descriptions-item label="电话">{{ detail.phone || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="社区">{{ detail.community || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="住址" :span="2">{{ detail.address || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="身高">{{ detail.height ? detail.height + ' cm' : '--' }}</el-descriptions-item>
+          <el-descriptions-item label="出生日期">{{ detail.birthDate || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="入档日期">{{ detail.admissionDate || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="紧急联系人">{{ detail.emergencyContact || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="紧急电话">{{ detail.emergencyPhone || '--' }}</el-descriptions-item>
+          <el-descriptions-item label="病史" :span="2">{{ detail.medicalHistory || '--' }}</el-descriptions-item>
+        </el-descriptions>
+        <el-divider>家属联系人</el-divider>
+        <el-table :data="detail.contacts || []" border size="small" v-if="(detail.contacts || []).length > 0">
+          <el-table-column prop="name" label="姓名" />
+          <el-table-column prop="relationship" label="关系" />
+          <el-table-column prop="phone" label="电话" />
+          <el-table-column label="紧急联系人">
+            <template #default="{ row }">{{ row.isEmergency ? '是' : '否' }}</template>
+          </el-table-column>
+        </el-table>
+        <el-empty v-else description="无家属信息" :image-size="40" />
+      </template>
+      <template #footer>
+        <el-button @click="detailVisible = false">关闭</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -137,8 +171,10 @@ import { useRoute } from 'vue-router'
 import { getElderlyList, getElderlyDetail, addElderly, updateElderly } from '@/api/elderly.js'
 import { getTagList, getTagsByElderly } from '@/api/tag.js'
 import { ElMessage } from 'element-plus'
+import { getStorage } from '@/utils/localStorage.js'
 
 const route = useRoute()
+const isDoctor = computed(() => getStorage('RoleCode') === 'DOCTOR')
 
 // ===== 筛选 =====
 const filters = reactive({
@@ -158,7 +194,14 @@ const isNewFilter = computed(() => route.meta?.filter === 'new')
 const title = computed(() => isNewFilter.value ? '本月新增老人' : '老人档案管理')
 const elderlyTags = reactive({})  // { elderlyId: [{id,tagName,color}, ...] }
 
-const doctorId = 3
+const dialogVisible = ref(false), isEdit = ref(false), formTitle = ref('')
+const form = reactive({ id: null, name: '', idCard: '', gender: 1, phone: '', community: '', address: '', height: null, birthDate: '', age: null, admissionDate: '', emergencyContact: '', emergencyPhone: '', medicalHistory: '', contacts: [] })
+
+// 只读详情
+const detailVisible = ref(false)
+const detail = ref(null)
+
+const doctorId = 3 // TODO: from Token
 
 const search = async () => {
   loading.value = true
@@ -202,10 +245,8 @@ const parseAgeRange = (range) => {
   return [lo, hi]
 }
 
-// ===== 表单逻辑（保留原有） =====
+// ===== 表单逻辑 =====
 const rels = ['配偶','子女','父母','兄弟姐妹','其他']
-const dialogVisible = ref(false), isEdit = ref(false), formTitle = ref('')
-const form = reactive({ id: null, name: '', idCard: '', gender: 1, phone: '', community: '', address: '', height: null, birthDate: '', age: null, admissionDate: '', emergencyContact: '', emergencyPhone: '', medicalHistory: '', contacts: [] })
 
 const parseIdCard = () => {
   const c = form.idCard
@@ -218,13 +259,20 @@ const parseIdCard = () => {
 }
 const resetForm = () => { Object.assign(form, { id: null, name: '', idCard: '', gender: 1, phone: '', community: '', address: '', height: null, birthDate: '', age: null, admissionDate: '', emergencyContact: '', emergencyPhone: '', medicalHistory: '', contacts: [] }) }
 const openAdd = () => { resetForm(); formTitle.value = '新增老人档案'; isEdit.value = false; dialogVisible.value = true }
+const openDetail = async (row) => {
+  detailVisible.value = true
+  try {
+    const { data } = await getElderlyDetail(row.id)
+    detail.value = data.elderly || data
+    if (data.contacts) detail.value = { ...detail.value, contacts: data.contacts }
+  } catch { detail.value = null }
+}
 const openEdit = async (row) => {
   isEdit.value = true; formTitle.value = '编辑老人档案'
   const { data } = await getElderlyDetail(row.id)
   Object.assign(form, data.elderly, { contacts: (data.contacts || []).map(c => ({ ...c, isEmergency: !!c.isEmergency })) })
   dialogVisible.value = true
 }
-const openDetail = (row) => openEdit(row)
 const submitForm = async () => {
   const payload = { ...form, contacts: form.contacts.map(c => ({ ...c, isEmergency: c.isEmergency ? 1 : 0 })) }
   if (isEdit.value) { await updateElderly(form.id, payload); ElMessage.success('修改成功') }

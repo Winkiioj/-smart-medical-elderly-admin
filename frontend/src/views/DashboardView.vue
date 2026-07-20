@@ -5,56 +5,72 @@
     <!-- ===== 机构管理员：全局四卡片 ===== -->
     <el-row v-if="isOrgAdmin" :gutter="20">
       <el-col :span="6">
-        <el-card shadow="hover"><div class="stat-card">
-          <div class="stat-icon" style="background:#e6f7ff"><el-icon size="28" color="#409eff"><OfficeBuilding /></el-icon></div>
-          <div class="stat-text"><div class="stat-number">{{ data.communityCount }}</div><div class="stat-label">接入社区</div></div>
-        </div></el-card>
+        <el-card shadow="hover" class="stat-card-clickable" @click="$router.push('/communities')">
+          <div class="stat-card">
+            <div class="stat-icon" style="background:#e6f7ff"><el-icon size="28" color="#409eff"><OfficeBuilding /></el-icon></div>
+            <div class="stat-text"><div class="stat-number">{{ data.communityCount }}</div><div class="stat-label">接入社区</div></div>
+          </div>
+        </el-card>
       </el-col>
       <el-col :span="6">
-        <el-card shadow="hover"><div class="stat-card">
-          <div class="stat-icon" style="background:#f6ffed"><el-icon size="28" color="#67c23a"><User /></el-icon></div>
-          <div class="stat-text"><div class="stat-number">{{ data.elderlyTotal }}</div><div class="stat-label">在院老人总数</div></div>
-        </div></el-card>
+        <el-card shadow="hover" class="stat-card-clickable" @click="$router.push('/elderly')">
+          <div class="stat-card">
+            <div class="stat-icon" style="background:#f6ffed"><el-icon size="28" color="#67c23a"><User /></el-icon></div>
+            <div class="stat-text"><div class="stat-number">{{ data.elderlyTotal }}</div><div class="stat-label">在院老人总数</div></div>
+          </div>
+        </el-card>
       </el-col>
       <el-col :span="6">
-        <el-card shadow="hover"><div class="stat-card">
-          <div class="stat-icon" style="background:#fff7e6"><el-icon size="28" color="#e6a23c"><UserFilled /></el-icon></div>
-          <div class="stat-text"><div class="stat-number">{{ data.doctorTotal }}</div><div class="stat-label">签约医生</div></div>
-        </div></el-card>
+        <el-card shadow="hover" class="stat-card-clickable" @click="$router.push('/reports')">
+          <div class="stat-card">
+            <div class="stat-icon" style="background:#fff7e6"><el-icon size="28" color="#e6a23c"><UserFilled /></el-icon></div>
+            <div class="stat-text"><div class="stat-number">{{ data.doctorTotal }}</div><div class="stat-label">签约医生</div></div>
+          </div>
+        </el-card>
       </el-col>
       <el-col :span="6">
-        <el-card shadow="hover"><div class="stat-card">
-          <div class="stat-icon" style="background:#fef0f0"><el-icon size="28" color="#f56c6c"><Monitor /></el-icon></div>
-          <div class="stat-text"><div class="stat-number">{{ data.deviceOnlineRate }}<span class="unit">%</span></div><div class="stat-label">设备在线率</div></div>
-        </div></el-card>
+        <el-card shadow="hover" class="stat-card-clickable" @click="$router.push('/devices')">
+          <div class="stat-card">
+            <div class="stat-icon" style="background:#fef0f0"><el-icon size="28" color="#f56c6c"><Monitor /></el-icon></div>
+            <div class="stat-text"><div class="stat-number">{{ data.deviceOnlineRate }}<span class="unit">%</span></div><div class="stat-label">设备在线率</div></div>
+          </div>
+        </el-card>
       </el-col>
     </el-row>
 
     <!-- ===== 社区管理员：本社区四卡片 ===== -->
     <el-row v-if="isComAdmin" :gutter="20">
       <el-col :span="6">
-        <el-card shadow="hover"><div class="stat-card">
-          <div class="stat-icon" style="background:#e6f7ff"><el-icon size="28" color="#409eff"><User /></el-icon></div>
-          <div class="stat-text"><div class="stat-number">{{ data.elderlyTotal }}</div><div class="stat-label">在院老人</div></div>
-        </div></el-card>
+        <el-card shadow="hover" class="stat-card-clickable" @click="$router.push('/elderly')">
+          <div class="stat-card">
+            <div class="stat-icon" style="background:#e6f7ff"><el-icon size="28" color="#409eff"><User /></el-icon></div>
+            <div class="stat-text"><div class="stat-number">{{ data.elderlyTotal }}</div><div class="stat-label">在院老人</div></div>
+          </div>
+        </el-card>
       </el-col>
       <el-col :span="6">
-        <el-card shadow="hover"><div class="stat-card">
-          <div class="stat-icon" style="background:#f6ffed"><el-icon size="28" color="#67c23a"><Plus /></el-icon></div>
-          <div class="stat-text"><div class="stat-number">{{ data.newThisMonth }}</div><div class="stat-label">本月新增老人</div></div>
-        </div></el-card>
+        <el-card shadow="hover" class="stat-card-clickable" @click="$router.push('/elderly-new')">
+          <div class="stat-card">
+            <div class="stat-icon" style="background:#f6ffed"><el-icon size="28" color="#67c23a"><Plus /></el-icon></div>
+            <div class="stat-text"><div class="stat-number">{{ data.newThisMonth }}</div><div class="stat-label">本月新增老人</div></div>
+          </div>
+        </el-card>
       </el-col>
       <el-col :span="6">
-        <el-card shadow="hover"><div class="stat-card">
-          <div class="stat-icon" style="background:#fff7e6"><el-icon size="28" color="#e6a23c"><WarningFilled /></el-icon></div>
-          <div class="stat-text"><div class="stat-number">{{ data.pendingWarnings }}</div><div class="stat-label">待处理预警</div></div>
-        </div></el-card>
+        <el-card shadow="hover" class="stat-card-clickable" @click="$router.push('/warnings')">
+          <div class="stat-card">
+            <div class="stat-icon" style="background:#fff7e6"><el-icon size="28" color="#e6a23c"><WarningFilled /></el-icon></div>
+            <div class="stat-text"><div class="stat-number">{{ data.pendingWarnings }}</div><div class="stat-label">待处理预警</div></div>
+          </div>
+        </el-card>
       </el-col>
       <el-col :span="6">
-        <el-card shadow="hover"><div class="stat-card">
-          <div class="stat-icon" style="background:#fef0f0"><el-icon size="28" color="#f56c6c"><Monitor /></el-icon></div>
-          <div class="stat-text"><div class="stat-number">{{ data.deviceOnlineRate }}<span class="unit">%</span></div><div class="stat-label">设备在线率</div></div>
-        </div></el-card>
+        <el-card shadow="hover" class="stat-card-clickable" @click="$router.push('/devices')">
+          <div class="stat-card">
+            <div class="stat-icon" style="background:#fef0f0"><el-icon size="28" color="#f56c6c"><Monitor /></el-icon></div>
+            <div class="stat-text"><div class="stat-number">{{ data.deviceOnlineRate }}<span class="unit">%</span></div><div class="stat-label">设备在线率</div></div>
+          </div>
+        </el-card>
       </el-col>
     </el-row>
 
@@ -146,6 +162,8 @@ onMounted(async () => {
 
 <style scoped>
 .stat-card { display:flex; align-items:center; gap:16px; }
+.stat-card-clickable { cursor: pointer; transition: all .2s; }
+.stat-card-clickable:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1) !important; }
 .stat-icon { width:56px; height:56px; border-radius:12px; display:flex; align-items:center; justify-content:center; }
 .stat-number { font-size:28px; font-weight:bold; color:#303133; }
 .stat-number .unit { font-size:16px; font-weight:normal; color:#909399; }
