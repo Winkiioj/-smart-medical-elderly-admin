@@ -121,17 +121,24 @@ const fetchDetail = async () => {
     const res = await getReportDetail(route.params.id)
     if (res.code === 200) {
       Object.assign(detail, res.data)
-      // 初始化逐项评分数组（每个维度一个数组，长度=items数量）
+      // 初始化逐项评分 + 从后端维度总分还原
       detail.dimensions.forEach(d => {
-        const len = getItems(d).length
+        const items = getItems(d)
+        const len = items.length
+        // 查找后端已保存的维度总分
+        const saved = (detail.scores || []).find(s => s.dimensionId === d.id)
+        const dimScore = saved ? (saved.score || 0) : 0
+        // 维度总分均摊到各评分项（已发布报告仅展示，草稿可后续调整）
         if (!itemScoreMap[d.id]) {
-          itemScoreMap[d.id] = reactive(new Array(len).fill(0))
+          const perItem = len > 0 ? Math.floor(dimScore / len) : 0
+          const remainder = len > 0 ? dimScore - perItem * len : 0
+          const arr = new Array(len).fill(perItem)
+          for (let i = 0; i < remainder; i++) arr[i]++
+          itemScoreMap[d.id] = reactive(arr)
         }
+        // 同步维度总分到 scoreMap
+        scoreMap[d.id] = dimScore
       })
-      // 回填已有评分（仅作参考，无法还原到逐项）
-      if (detail.scores) {
-        detail.scores.forEach(s => { scoreMap[s.dimensionId] = s.score })
-      }
     }
   } finally { loading.value = false }
 }
