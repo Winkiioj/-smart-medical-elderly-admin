@@ -148,7 +148,7 @@ public class DeviceServiceImpl
     }
 
     @Override
-    public CommonResult getDashboard() {
+    public CommonResult getDashboard(int repairPageNo, int repairPageSize) {
         int online = this.baseMapper.countByStatus(1);
         int offline = this.baseMapper.countByStatus(2);
         int repairing = this.baseMapper.countByStatus(3);
@@ -157,8 +157,10 @@ public class DeviceServiceImpl
         // 查询维修中的设备 + 最近日志
         LambdaQueryWrapper<Device> repairWrapper = new LambdaQueryWrapper<>();
         repairWrapper.eq(Device::getStatus, 3).orderByDesc(Device::getUpdateTime);
-        Page<Device> repairPage = new Page<>(1, 5);
-        java.util.List<Device> repairingDevices = this.baseMapper.selectPage(repairPage, repairWrapper).getRecords();
+        Page<Device> repairPage = new Page<>(repairPageNo, repairPageSize);
+        IPage<Device> repairResult = this.baseMapper.selectPage(repairPage, repairWrapper);
+        java.util.List<Device> repairingDevices = repairResult.getRecords();
+        long repairingTotal = repairResult.getTotal();
 
         // 查询质保即将到期设备（30天内）
         LambdaQueryWrapper<Device> warrantyWrapper = new LambdaQueryWrapper<>();
@@ -166,7 +168,7 @@ public class DeviceServiceImpl
                        .ge(Device::getWarrantyEnd, LocalDate.now())
                        .ne(Device::getStatus, 4)  // 排除已报废
                        .orderByAsc(Device::getWarrantyEnd);
-        Page<Device> warrantyPage = new Page<>(1, 5);
+        Page<Device> warrantyPage = new Page<>(1, 50);
         java.util.List<Device> expiringDevices = this.baseMapper.selectPage(warrantyPage, warrantyWrapper).getRecords();
 
         java.util.Map<String, Object> result = new java.util.LinkedHashMap<>();
@@ -178,6 +180,7 @@ public class DeviceServiceImpl
                 "scrapped", scrapped
         ));
         result.put("repairingDevices", repairingDevices);
+        result.put("repairingTotal", repairingTotal);
         result.put("expiringDevices", expiringDevices);
 
         return CommonResult.success(result);

@@ -162,6 +162,24 @@
         <el-button type="primary" @click="handleSubmit">保存</el-button>
       </template>
     </el-dialog>
+
+    <!-- 设备详情弹窗 -->
+    <el-dialog v-model="detailVisible" title="设备详情" width="500px">
+      <el-descriptions v-if="detailData" :column="2" border size="small">
+        <el-descriptions-item label="设备编号">{{ detailData.deviceNo }}</el-descriptions-item>
+        <el-descriptions-item label="设备名称">{{ detailData.deviceName }}</el-descriptions-item>
+        <el-descriptions-item label="设备类型">{{ detailData.deviceType }}</el-descriptions-item>
+        <el-descriptions-item label="状态">
+          <el-tag :type="statusTagType(detailData.status)" size="small">{{ statusText(detailData.status) }}</el-tag>
+        </el-descriptions-item>
+        <el-descriptions-item label="品牌">{{ detailData.brand || '--' }}</el-descriptions-item>
+        <el-descriptions-item label="型号">{{ detailData.model || '--' }}</el-descriptions-item>
+        <el-descriptions-item label="所属社区">{{ detailData.community || '--' }}</el-descriptions-item>
+        <el-descriptions-item label="购置日期">{{ detailData.buyDate || '--' }}</el-descriptions-item>
+        <el-descriptions-item label="保修截止">{{ detailData.warrantyEnd || '--' }}</el-descriptions-item>
+        <el-descriptions-item label="备注" :span="2">{{ detailData.remark || '--' }}</el-descriptions-item>
+      </el-descriptions>
+    </el-dialog>
   </div>
 </template>
 
@@ -172,6 +190,8 @@ import { getDevicePage, getDeviceDetail, addDevice, updateDevice, updateDeviceSt
 import { getStorage } from '@/utils/localStorage.js'
 
 const isDeviceAdmin = computed(() => getStorage('RoleCode') === 'DEVICE_ADMIN')
+const detailVisible = ref(false)
+const detailData = ref(null)
 
 // ===== 数据 =====
 const loading = ref(false)
@@ -286,15 +306,8 @@ const handleDetail = async (row) => {
   try {
     const res = await getDeviceDetail(row.id)
     if (res.code === 200) {
-      const d = res.data
-      ElMessageBox.alert(
-        `编号：${d.deviceNo}\n名称：${d.deviceName}\n类型：${d.deviceType}\n` +
-        `品牌：${d.brand || '--'}\n型号：${d.model || '--'}\n` +
-        `社区：${d.community || '--'}\n状态：${statusText(d.status)}\n` +
-        `购置：${d.buyDate || '--'}\n保修截止：${d.warrantyEnd || '--'}\n` +
-        `备注：${d.remark || '--'}`,
-        '设备详情', { confirmButtonText: '关闭' }
-      )
+      detailData.value = res.data
+      detailVisible.value = true
     }
   } catch { ElMessage.error('操作失败') }
 }

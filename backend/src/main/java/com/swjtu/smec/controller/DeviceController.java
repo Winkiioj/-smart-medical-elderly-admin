@@ -71,8 +71,9 @@ public class DeviceController {
 
     @NoToken
     @GetMapping("/dashboard")
-    public CommonResult dashboard() {
-        return deviceService.getDashboard();
+    public CommonResult dashboard(@RequestParam(defaultValue = "1") int repairPageNo,
+                                  @RequestParam(defaultValue = "8") int repairPageSize) {
+        return deviceService.getDashboard(repairPageNo, repairPageSize);
     }
 
     @NoToken
