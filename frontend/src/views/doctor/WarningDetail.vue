@@ -151,8 +151,10 @@ const fetchDetail = async () => {
 const handleAccept = async () => {
   try {
     const res = await acceptWarning(warning.id, 3) // TODO: 真实 handlerId
-    if (res.code === 200) { ElMessage.success('已接单，随访计划已自动生成。请前往随访管理执行'); fetchDetail() }
-    else ElMessage.error(res.msg)
+    if (res.code === 200) {
+      ElMessage.success(res.data || '已接单，随访计划已自动生成')
+      fetchDetail()
+    } else ElMessage.error(res.msg)
   } catch { ElMessage.error('操作失败') }
 }
 
