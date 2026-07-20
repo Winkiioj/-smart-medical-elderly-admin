@@ -1,0 +1,237 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName Microsoft YaHei
+skinparam defaultFontSize 12
+skinparam defaultFontColor #333333
+skinparam ArrowThickness 2
+skinparam EntityBackgroundColor #E3F2FD
+skinparam EntityBorderColor #1565C0
+
+title 智慧医养管理系统 — 核心实体关系图 (E-R Diagram)
+
+' ===== 用户权限域 =====
+entity "sys_user\n系统用户" as user #C8E6C9 {
+  * id <<PK AUTO_INCREMENT>>
+  --
+  username (VARCHAR 50)
+  password (VARCHAR 200 BCrypt)
+  real_name (VARCHAR 50)
+  phone (VARCHAR 20)
+  community (VARCHAR 100)
+  status (TINYINT 0/1)
+}
+
+entity "sys_role\n系统角色" as role #C8E6C9 {
+  * id <<PK>>
+  --
+  role_code (VARCHAR 30)\nORG_ADMIN/COM_ADMIN\n/DOCTOR/DEVICE_ADMIN
+  role_name (VARCHAR 50)
+}
+
+entity "sys_user_role\n用户-角色关联" as ur #C8E6C9 {
+  * id <<PK>>
+  --
+  user_id <<FK>>
+  role_id <<FK>>
+}
+
+' ===== 老人档案域 =====
+entity "elderly\n老人信息" as elderly #FFF9C4 {
+  * id <<PK AUTO_INCREMENT>>
+  --
+  name (VARCHAR 50)
+  id_card (VARCHAR 18) <<UNIQUE>>
+  gender (TINYINT 1=男/2=女)
+  birth_date (DATE)
+  age (INT)
+  phone (VARCHAR 20)
+  community (VARCHAR 100)
+  doctor_id <<FK sys_user>>
+  admission_date (DATE)
+  status (TINYINT 0=离院/1=在院)
+  is_deleted <<@TableLogic>>
+}
+
+entity "family_member\n家属联系人" as family #FFF9C4 {
+  * id <<PK AUTO_INCREMENT>>
+  --
+  elderly_id <<FK>>
+  name (VARCHAR 50)
+  relationship (VARCHAR 20)
+  phone (VARCHAR 20)
+  is_emergency (TINYINT 0/1)
+}
+
+' ===== 健康数据域 =====
+entity "health_record\n健康记录" as hr #E1BEE7 {
+  * id <<PK AUTO_INCREMENT>>
+  --
+  elderly_id <<FK>>
+  measure_date (DATE)
+  systolic_pressure (INT mmHg)
+  diastolic_pressure (INT mmHg)
+  heart_rate (INT bpm)
+  blood_sugar (DECIMAL mmol/L)
+  blood_oxygen (DECIMAL %)
+  bmi (DECIMAL 自动计算)
+  temperature (DECIMAL 摄氏度)
+}
+
+' ===== 预警管理域 =====
+entity "warning_rule\n预警规则" as rule #FFCCBC {
+  * id <<PK AUTO_INCREMENT>>
+  --
+  rule_name (VARCHAR 100)
+  indicator_type (VARCHAR 50)
+  min_value (DECIMAL)
+  max_value (DECIMAL)
+  alert_level (TINYINT 1轻/2中/3重)
+  is_enabled (TINYINT 0/1)
+}
+
+entity "warning_record\n预警记录" as warning #FFCCBC {
+  * id <<PK AUTO_INCREMENT>>
+  --
+  elderly_id <<FK>>
+  rule_id <<FK>>
+  health_record_id <<FK>>
+  alert_level (TINYINT)
+  alert_title (VARCHAR 200)
+  trigger_value (VARCHAR 50)
+  threshold_value (VARCHAR 50)
+  status (TINYINT)\n0待处理/1处理中/2已完成/3已关闭
+  handler_id (BIGINT)
+  handle_opinion (VARCHAR 500)
+  handle_result (VARCHAR 200)
+}
+
+' ===== 随访管理域 =====
+entity "followup_plan\n随访计划" as plan #B2EBF2 {
+  * id <<PK AUTO_INCREMENT>>
+  --
+  elderly_id <<FK>>
+  plan_date (DATE)
+  followup_type (TINYINT)\n1电话/2上门/3门诊
+  doctor_id <<FK>>
+  status (TINYINT)\n0待执行/1执行中\n/2已完成/3已逾期
+}
+
+entity "followup_record\n随访记录" as record #B2EBF2 {
+  * id <<PK AUTO_INCREMENT>>
+  --
+  plan_id <<FK>>
+  elderly_id <<FK>>
+  followup_date (DATE)
+  elderly_status (TEXT)
+  intervention (TEXT)
+  result (VARCHAR 50)
+  next_plan_date (DATE)
+}
+
+' ===== 评估报告域 =====
+entity "assessment_template\n评估模板" as tmpl #FFE0B2 {
+  * id <<PK AUTO_INCREMENT>>
+  --
+  template_name (VARCHAR 100)
+  dimension_count (INT)
+  full_score (INT)
+}
+
+entity "assessment_dimension\n评估维度" as dim #FFE0B2 {
+  * id <<PK AUTO_INCREMENT>>
+  --
+  template_id <<FK>>
+  dimension_name (VARCHAR 100)
+  max_score (INT)
+  weight (DECIMAL)
+  scoring_guide (TEXT JSON)
+}
+
+entity "assessment_report\n评估报告" as report #FFE0B2 {
+  * id <<PK AUTO_INCREMENT>>
+  --
+  elderly_id <<FK>>
+  template_id <<FK>>
+  doctor_id <<FK>>
+  total_score (DECIMAL)
+  score_level (VARCHAR 20)
+  status (TINYINT 0草稿/1发布)
+}
+
+entity "assessment_score\n评估评分" as score #FFE0B2 {
+  * id <<PK AUTO_INCREMENT>>
+  --
+  report_id <<FK>>
+  dimension_id <<FK>>
+  score (INT)
+  max_score (INT)
+}
+
+' ===== 设备管理域 =====
+entity "device\n设备台账" as device #CFD8DC {
+  * id <<PK AUTO_INCREMENT>>
+  --
+  device_no (VARCHAR 50) <<UNIQUE>>
+  device_name (VARCHAR 100)
+  device_type (VARCHAR 30)
+  community (VARCHAR 100)
+  status (TINYINT)\n1在线/2离线/3维修/4报废
+}
+
+' ===== 通用服务域 =====
+entity "elderly_tag\n老人标签" as tag #D7CCC8 {
+  * id <<PK AUTO_INCREMENT>>
+  --
+  tag_name (VARCHAR 50)
+  color (VARCHAR 20)
+}
+
+entity "elderly_tag_mapping\n标签关联" as tm #D7CCC8 {
+  * id <<PK AUTO_INCREMENT>>
+  --
+  elderly_id <<FK>>
+  tag_id <<FK>>
+}
+
+entity "notification\n消息通知" as notif #D7CCC8 {
+  * id <<PK AUTO_INCREMENT>>
+  --
+  user_id <<FK>>
+  title (VARCHAR 200)
+  content (TEXT)
+  type (TINYINT)\n1预警/2随访/3系统
+  is_read (TINYINT 0/1)
+}
+
+entity "community\n社区" as comm #D7CCC8 {
+  * id <<PK AUTO_INCREMENT>>
+  --
+  name (VARCHAR 100)
+  address (VARCHAR 200)
+  contact_name (VARCHAR 50)
+  contact_phone (VARCHAR 20)
+  status (TINYINT 0/1)
+}
+
+' ===== 关系连线 =====
+user ||--o{ ur : "拥有"
+ur }o--|| role : "分配"
+user }o--|| comm : "所属社区"
+user ||--o{ elderly : "签约医生\n(doctor_id)"
+elderly ||--o{ family : "家属联系人"
+elderly ||--o{ hr : "健康测量"
+elderly ||--o{ warning : "触发预警"
+rule ||--o{ warning : "规则匹配"
+hr ||--o{ warning : "触发来源"
+elderly ||--o{ plan : "随访对象"
+plan ||--|| record : "执行记录"
+elderly ||--o{ report : "评估对象"
+tmpl ||--o{ dim : "评分维度"
+tmpl ||--o{ report : ""
+report ||--o{ score : "评分明细"
+dim ||--o{ score : ""
+elderly }o--o{ tm : ""
+tag }o--o{ tm : "标签映射"
+user ||--o{ notif : "接收通知"
+
+@enduml

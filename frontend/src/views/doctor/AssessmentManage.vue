@@ -7,8 +7,8 @@
     </div>
     <el-card shadow="hover">
       <el-table :data="tableData" stripe border v-loading="loading">
-        <el-table-column prop="elderlyId" label="老人ID" width="80" />
-        <el-table-column prop="templateId" label="模板ID" width="80" />
+        <el-table-column prop="elderlyName" label="老人" width="80" />
+        <el-table-column prop="templateName" label="模板" min-width="120" show-overflow-tooltip />
         <el-table-column label="总分" width="90"><template #default="{ row }">{{ row.totalScore || 0 }} / {{ row.fullScore || 0 }}</template></el-table-column>
         <el-table-column label="等级" width="80"><template #default="{ row }"><el-tag :type="levelTag(row.scoreLevel)" size="small">{{ row.scoreLevel || '--' }}</el-tag></template></el-table-column>
         <el-table-column label="状态" width="80"><template #default="{ row }"><el-tag :type="row.status===1?'success':'info'" size="small">{{ row.status===1?'已发布':'草稿' }}</el-tag></template></el-table-column>

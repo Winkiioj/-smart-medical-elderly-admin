@@ -1,0 +1,85 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName Microsoft YaHei
+skinparam defaultFontSize 13
+skinparam defaultFontColor #333333
+skinparam ArrowThickness 2
+skinparam componentBackgroundColor #E3F2FD
+skinparam componentBorderColor #1565C0
+
+title 智慧医养管理系统 — 系统功能结构图
+
+package "智慧医养管理系统 (SMECMS)" as root #BBDEFB {
+
+  package "认证与权限管理" #C8E6C9 {
+    [用户登录/登出] as a1
+    [JWT Token 管理] as a2
+    [RBAC 四角色权限] as a3
+    [AOP Token 统一校验] as a4
+  }
+
+  package "老人档案管理" #FFF9C4 {
+    [档案 CRUD] as e1
+    [身份证智能解析] as e2
+    [家属联系人管理] as e3
+    [老人标签管理] as e4
+    [老人分配签约] as e5
+    [医生管理] as e6
+  }
+
+  package "健康数据管理" #E1BEE7 {
+    [健康数据录入] as h1
+    [JSON 批量导入] as h2
+    [模板下载] as h3
+    [BMI 自动计算] as h4
+    [8指标趋势图] as h5
+  }
+
+  package "健康预警管理" #FFCCBC {
+    [预警规则配置] as w1
+    [规则自动扫描] as w2
+    [24h 去重] as w3
+    [四级状态机处理] as w4
+    [通知消息推送] as w5
+  }
+
+  package "随访计划管理" #B2EBF2 {
+    [随访计划 CRUD] as f1
+    [计划日期调整] as f2
+    [随访执行记录] as f3
+    [逾期自动标记] as f4
+    [历史记录查看] as f5
+  }
+
+  package "健康评估报告" #FFE0B2 {
+    [评估模板管理] as as1
+    [维度权重配置] as as2
+    [逐项打分] as as3
+    [维度小计校验] as as4
+    [评估结论生成] as as5
+  }
+
+  package "设备台账管理" #CFD8DC {
+    [设备 CRUD] as d1
+    [四状态流转] as d2
+    [报修工单提交] as d3
+    [Dashboard 统计] as d4
+    [质保到期提醒] as d5
+  }
+
+  package "报表与数据决策" #F8BBD0 {
+    [全局跨社区对比] as r1
+    [社区深度下钻] as r2
+    [ECharts 可视化] as r3
+    [多 Sheet Excel 导出] as r4
+    [角色感知展示] as r5
+  }
+
+  package "通用服务" #D7CCC8 {
+    [消息通知] as c1
+    [社区管理] as c2
+    [导入日志] as c3
+  }
+}
+
+@enduml

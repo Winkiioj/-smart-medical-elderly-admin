@@ -30,7 +30,7 @@
 
     <el-card shadow="hover">
       <el-table :data="tableData" stripe border v-loading="loading">
-        <el-table-column prop="elderlyId" label="老人ID" width="80" />
+        <el-table-column prop="elderlyName" label="老人" width="80" />
         <el-table-column label="类型" width="80"><template #default="{ row }">{{ typeText(row.followupType) }}</template></el-table-column>
         <el-table-column prop="planDate" label="计划日期" width="120" />
         <el-table-column label="剩余天数" width="110" align="center">

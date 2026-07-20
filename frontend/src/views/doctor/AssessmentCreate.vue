@@ -12,35 +12,46 @@
             {{ parseGuide(d.scoringGuide) }}
           </div>
 
-          <!-- 逐项评分表格 -->
-          <el-table :data="getItems(d)" border size="small" :show-header="getItems(d).length > 0">
-            <el-table-column type="index" label="序号" width="60" align="center" />
-            <el-table-column prop="name" label="评估项目" min-width="200" />
-            <el-table-column label="得分" width="160" align="center">
-              <template #default="{ row, $index }">
-                <el-input-number
-                  v-model="itemScoreMap[d.id][$index]"
-                  :min="0"
-                  :max="getPerItemMax(d)"
-                  size="small"
-                  controls-position="right"
-                  @change="() => onItemChange(d)"
-                  :disabled="detail.report?.status === 1"
-                />
-                <span style="margin-left:4px;color:#909399;font-size:12px">/ {{ getPerItemMax(d) }}</span>
-              </template>
-            </el-table-column>
-          </el-table>
+          <!-- 查看模式：显示已保存的维度得分 -->
+          <template v-if="detail.report?.status === 1">
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0">
+              <span style="color:#606266;font-size:13px">{{ parseGuide(d.scoringGuide) }}</span>
+              <span style="font-weight:bold;font-size:16px">
+                {{ scoreMap[d.id] || 0 }} / {{ d.maxScore }} 分
+              </span>
+            </div>
+          </template>
 
-          <!-- 维度小计 -->
-          <div style="margin-top:10px;display:flex;justify-content:flex-end;align-items:center;gap:8px">
-            维度小计：
-            <span :style="{color: getDimSum(d.id) > d.maxScore ? '#F56C6C' : '#303133', fontWeight:'bold', fontSize:'16px'}">
-              {{ getDimSum(d.id) }}
-            </span>
-            <span style="color:#909399">/ {{ d.maxScore }} 分</span>
-            <el-tag v-if="getDimSum(d.id) > d.maxScore" type="danger" size="small">超出满分</el-tag>
-          </div>
+          <!-- 编辑模式：逐项评分表格 -->
+          <template v-else>
+            <el-table :data="getItems(d)" border size="small" :show-header="getItems(d).length > 0">
+              <el-table-column type="index" label="序号" width="60" align="center" />
+              <el-table-column prop="name" label="评估项目" min-width="200" />
+              <el-table-column label="得分" width="160" align="center">
+                <template #default="{ row, $index }">
+                  <el-input-number
+                    v-model="itemScoreMap[d.id][$index]"
+                    :min="0"
+                    :max="getPerItemMax(d)"
+                    size="small"
+                    controls-position="right"
+                    @change="() => onItemChange(d)"
+                  />
+                  <span style="margin-left:4px;color:#909399;font-size:12px">/ {{ getPerItemMax(d) }}</span>
+                </template>
+              </el-table-column>
+            </el-table>
+
+            <!-- 维度小计 -->
+            <div style="margin-top:10px;display:flex;justify-content:flex-end;align-items:center;gap:8px">
+              维度小计：
+              <span :style="{color: getDimSum(d.id) > d.maxScore ? '#F56C6C' : '#303133', fontWeight:'bold', fontSize:'16px'}">
+                {{ getDimSum(d.id) }}
+              </span>
+              <span style="color:#909399">/ {{ d.maxScore }} 分</span>
+              <el-tag v-if="getDimSum(d.id) > d.maxScore" type="danger" size="small">超出满分</el-tag>
+            </div>
+          </template>
         </el-card>
       </el-col>
 

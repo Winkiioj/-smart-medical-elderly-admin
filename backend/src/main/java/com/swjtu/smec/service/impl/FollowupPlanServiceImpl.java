@@ -5,9 +5,11 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.swjtu.smec.common.result.CommonResult;
+import com.swjtu.smec.entity.Elderly;
 import com.swjtu.smec.entity.FollowupPlan;
 import com.swjtu.smec.entity.FollowupRecord;
 import com.swjtu.smec.mapper.FollowupPlanMapper;
+import com.swjtu.smec.service.ElderlyService;
 import com.swjtu.smec.service.FollowupPlanService;
 import com.swjtu.smec.service.FollowupRecordService;
 import com.swjtu.smec.service.HealthRecordService;
@@ -18,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 @Service
 @Transactional
@@ -31,6 +34,9 @@ public class FollowupPlanServiceImpl
     @Autowired
     private HealthRecordService healthRecordService;
 
+    @Autowired
+    private ElderlyService elderlyService;
+
     @Override
     public CommonResult pageByDoctor(int pageNo, int pageSize, Long doctorId,
                                       Integer followupType, Integer status,
@@ -38,6 +44,11 @@ public class FollowupPlanServiceImpl
         Page<FollowupPlan> page = new Page<>(pageNo, pageSize);
         IPage<FollowupPlan> result = this.baseMapper.selectPageByDoctor(
                 page, doctorId, followupType, status, startDate, endDate);
+        // 填充老人姓名
+        for (FollowupPlan plan : result.getRecords()) {
+            Elderly e = elderlyService.getById(plan.getElderlyId());
+            if (e != null) plan.setElderlyName(e.getName());
+        }
         return CommonResult.success(result.getRecords(), result.getTotal());
     }
 

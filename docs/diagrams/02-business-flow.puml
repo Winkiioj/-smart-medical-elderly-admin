@@ -1,0 +1,91 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName Microsoft YaHei
+skinparam defaultFontSize 14
+skinparam defaultFontColor #333333
+skinparam ArrowThickness 2
+skinparam ActivityBorderColor #1565C0
+skinparam ActivityBackgroundColor #E3F2FD
+skinparam ActivityStartColor #4CAF50
+skinparam ActivityEndColor #F44336
+skinparam ActivityBarColor #FF9800
+
+title 智慧医养管理系统 — 核心业务流程图
+
+|医生端|
+start
+:用户登录系统;
+:查看 Dashboard 工作台
+(统计卡片 + 趋势图表);
+
+|医生端|
+:进入老人档案管理;
+:录入老人基本信息;
+:输入身份证号;
+:自动解析\n出生日期 / 性别 / 年龄;
+:填写家属联系人和健康信息;
+:保存老人档案;
+
+|医生端|
+:录入健康数据
+(手动录入 或 JSON批量导入);
+:BMI 自动计算;
+
+|系统后台|
+:自动预警扫描
+(比对 warning_rule 规则);
+if (指标是否超出阈值?) then (是)
+  if (24h内是否有同类预警?) then (否)
+    :生成预警记录
+    (status = 待处理);
+    :推送通知消息给签约医生;
+  else (是)
+    :跳过 (24h去重);
+  endif
+else (否)
+  :存入 health_record 表
+  (供趋势分析使用);
+endif
+
+|医生端|
+:查看预警列表
+(按级别/状态筛选);
+:点击查看预警详情
+(含老人信息和触发值);
+:接单处理
+(status 变更为 处理中);
+:填写处理意见 + 处理结果;
+:完成处理
+(status 变更为 已完成);
+
+|医生端|
+if (是否需要随访?) then (是)
+  :创建随访计划
+  (选老人 + 随访类型 + 计划日期);
+  :执行随访
+  (电话 / 上门 / 门诊);
+  :填写随访记录
+  (老人状态 + 干预措施
+   + 随访结果 + 下次随访日期);
+endif
+
+|医生端|
+:健康评估报告;
+:选择评估模板;
+:逐维度逐项打分;
+:维度小计 + 满分校验;
+:填写评估结论 (>=20字);
+:完成评估报告;
+
+|系统后台|
+:数据汇聚统计;
+:生成多维度报表
++ ECharts可视化图表;
+
+|管理员端|
+:查看全局/社区报表;
+:导出 Excel (多Sheet);
+
+stop
+
+@enduml

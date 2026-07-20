@@ -1,0 +1,176 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName Microsoft YaHei
+skinparam defaultFontSize 12
+skinparam defaultFontColor #333333
+skinparam ArrowThickness 2.5
+skinparam ArrowColor #546E7A
+skinparam rectangleBackgroundColor #F5F5F5
+skinparam rectangleBorderColor #90A4AE
+skinparam databaseBackgroundColor #E8EAF6
+skinparam databaseBorderColor #3F51B5
+skinparam storageBackgroundColor #FFF8E1
+skinparam storageBorderColor #FFA000
+skinparam noteBackgroundColor #FFFDE7
+skinparam noteBorderColor #F9A825
+skinparam packageBackgroundColor #ECEFF1
+skinparam packageBorderColor #607D8B
+skinparam minClassWidth 80
+
+title 智慧医养管理系统 — 数据流转图
+
+' ============================================================
+' 第一层：用户角色（2行2列，紧凑排列）
+' ============================================================
+together {
+  together {
+    actor "机构管理员" as org #C8E6C9
+    actor "社区管理员" as com #C8E6C9
+  }
+  together {
+    actor "社区医生"   as doc #A5D6A7
+    actor "设备管理员" as dev #C8E6C9
+  }
+}
+
+' 所有角色 → 前端登录（用一个合并节点收束）
+rectangle "用户登录" as login_entry #BBDEFB
+org -down-> login_entry
+com -down-> login_entry
+doc -down-> login_entry
+dev -down-> login_entry
+
+' ============================================================
+' 第二层：前端页面（3列竖向堆叠）
+' ============================================================
+package "前端展示层 (Vue 3 + Element Plus + ECharts)" as FE #E3F2FD {
+  together {
+    rectangle "登录页"        as fe_login    #C5E1A5
+    rectangle "Dashboard"     as fe_dash     #C5E1A5
+    rectangle "报表统计"      as fe_report   #C5E1A5
+    rectangle "社区管理"      as fe_comm     #C5E1A5
+  }
+  together {
+    rectangle "老人档案"      as fe_elderly  #90CAF9
+    rectangle "健康数据录入"  as fe_health   #90CAF9
+    rectangle "健康评估"      as fe_assess   #90CAF9
+    rectangle "随访管理"      as fe_followup #90CAF9
+  }
+  together {
+    rectangle "预警处理"      as fe_warning  #FFCC80
+    rectangle "设备台账"      as fe_device   #FFCC80
+    rectangle "消息通知"      as fe_notify   #FFCC80
+  }
+}
+
+login_entry -down-> fe_login
+
+' ============================================================
+' 第三层：后端服务（3列竖向堆叠）
+' ============================================================
+package "业务服务层 (Spring Boot 3.5 + MyBatisPlus)" as BE #FFF9C4 {
+  together {
+    rectangle "LoginController\nAOP Token校验" as ctrl_auth    #FFF176
+    rectangle "ReportService\nExcelUtil(POI)"  as ctrl_report  #FFF176
+    rectangle "CommunityController\nNotificationController" as ctrl_sys #FFF176
+  }
+  together {
+    rectangle "ElderlyController\nHealthRecordController" as ctrl_health  #A5D6A7
+    rectangle "DoctorDashboard" as ctrl_dash    #A5D6A7
+    rectangle "WarningRule引擎\nWarningController" as ctrl_warn #A5D6A7
+  }
+  together {
+    rectangle "FollowupController"    as ctrl_fu   #EF9A9A
+    rectangle "AssessmentController"  as ctrl_as   #EF9A9A
+    rectangle "DeviceController"      as ctrl_dev  #EF9A9A
+  }
+}
+
+' 前端 → 后端 连接
+fe_login   -down-> ctrl_auth    : POST /api/auth/login
+fe_dash    -down-> ctrl_dash    : 仪表盘数据
+fe_report  -down-> ctrl_report  : 报表查询/导出
+fe_comm    -down-> ctrl_sys     : 社区/通知管理
+fe_elderly -down-> ctrl_health  : 老人CRUD
+fe_health  -down-> ctrl_health  : 健康数据录入
+fe_assess  -down-> ctrl_as      : 评估报告
+fe_followup-down-> ctrl_fu      : 随访管理
+fe_warning -down-> ctrl_warn    : 预警处理
+fe_device  -down-> ctrl_dev     : 设备台账
+fe_notify  -down-> ctrl_sys     : 通知已读
+
+' ============================================================
+' 第四层：数据存储（2列）
+' ============================================================
+package "数据持久层 (MySQL 8.0 + Redis 7.x)" as DL #F3E5F5 {
+  together {
+    database "MySQL\nsmart_elderly_care\n(21张表)" as mysql #C5CAE9 {
+      together {
+        folder "sys_user / sys_role / sys_menu\nnotification / community" as db_auth
+        folder "elderly / family_member\nhealth_record" as db_elderly
+      }
+      together {
+        folder "warning_rule\nwarning_record" as db_warn
+        folder "followup_plan\nfollowup_record" as db_fu
+      }
+      together {
+        folder "assessment_template\nassessment_dimension\nassessment_report\nassessment_score" as db_as
+        folder "device\ndevice_monitor_log" as db_dev
+      }
+    }
+  }
+  together {
+    database "Redis\n缓存" as redis #FFE0B2 {
+      storage "Token\n(30min TTL)" as redis_tok
+      storage "菜单缓存\n(按角色)" as redis_menu
+    }
+  }
+}
+
+' 后端 → 数据层 连接
+ctrl_auth   -down-> db_auth      : 查用户+角色
+ctrl_auth   -down-> redis_tok    : JWT存取+校验
+ctrl_auth   -down-> redis_menu   : 菜单缓存
+ctrl_health -down-> db_elderly   : 老人+健康CRUD
+ctrl_dash   -down-> db_elderly   : 仪表盘聚合
+ctrl_warn   -down-> db_warn      : 规则加载+预警生成
+ctrl_warn   -down-> db_elderly   : 比对健康数据
+ctrl_fu     -down-> db_fu        : 随访CRUD
+ctrl_as     -down-> db_as        : 评估CRUD
+ctrl_dev    -down-> db_dev       : 设备CRUD
+
+' ============================================================
+' 报表聚合（跨多个数据库表）
+' ============================================================
+ctrl_report -down-> db_auth      : 社区统计
+ctrl_report -down-> db_elderly   : 老人统计
+ctrl_report -down-> db_warn      : 预警统计
+ctrl_report -down-> db_fu        : 随访统计
+ctrl_report -down-> db_dev       : 设备统计
+
+' ============================================================
+' 预警引擎——比对健康数据后写预警+发通知
+' ============================================================
+ctrl_warn -down-> db_auth        : 生成通知
+
+' ============================================================
+' 第五层：外部输出
+' ============================================================
+file "Excel报表\n.xlsx" as excel_out #C8E6C9
+ctrl_report -down-> excel_out    : POI导出
+
+' ============================================================
+' 图例
+' ============================================================
+legend bottom
+  <b>7条核心数据流:</b>
+  (1) 认证授权 — 登录→JWT签发→Redis缓存→AOP校验
+  (2) 老人档案 — 录入→身份证解析→elderly/family_member
+  (3) 预警触发 — 健康数据→WarningRule比对→去重→生成预警→推送通知
+  (4) 随访评估 — 随访计划/执行/记录 + 评估模板/打分/报告
+  (5) 设备管理 — 台账CRUD + 监控日志 + 离线告警
+  (6) 报表导出 — 多表聚合→ReportService→POI .xlsx
+  (7) 消息通知 — notification推送 + 已读/全部已读
+end legend
+
+@enduml

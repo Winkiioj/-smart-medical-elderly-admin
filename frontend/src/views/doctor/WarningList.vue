@@ -35,6 +35,7 @@
     <!-- 列表 -->
     <el-card shadow="hover">
       <el-table :data="tableData" stripe border v-loading="loading">
+        <el-table-column prop="elderlyName" label="老人" width="80" />
         <el-table-column label="预警级别" width="90" align="center">
           <template #default="{ row }">
             <el-tag :type="levelTag(row.alertLevel)" size="small">{{ levelText(row.alertLevel) }}</el-tag>

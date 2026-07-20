@@ -1,0 +1,82 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName Microsoft YaHei
+skinparam defaultFontSize 14
+skinparam defaultFontColor #333333
+skinparam packageBackgroundColor #F5F5F5
+skinparam packageBorderColor #333333
+skinparam componentBackgroundColor #E3F2FD
+skinparam componentBorderColor #1565C0
+skinparam databaseBackgroundColor #FFF3E0
+skinparam databaseBorderColor #E65100
+skinparam noteBackgroundColor #FFFDE7
+skinparam noteBorderColor #F9A825
+skinparam arrowColor #546E7A
+skinparam ArrowThickness 2
+
+title 智慧医养管理系统 (SMECMS) — 系统架构分层图
+
+package "前端层 (Web端)" #E8F5E9 {
+  component [Vue 3 + Vite\n(Composition API)] as vue
+  component [Element Plus\n(UI组件库)] as el
+  component [ECharts 5.5\n(数据可视化)] as echarts
+  component [Axios\n(HTTP客户端)] as axios
+  component [Vue Router\n(路由懒加载)] as router
+}
+
+package "接入层 (认证安全网关)" #FFF3E0 {
+  component [JWT Token\n(签发与验证)] as jwt
+  component [Redis缓存\n(Token存储 30min TTL)] as redis_auth
+  component [AOP AroundCut\n(Token统一校验)] as aop
+  component [CORS Filter\n(跨域配置)] as cors
+  component [GlobalException\n(全局异常处理)] as ex
+}
+
+package "应用层 (7个核心业务模块)" #E3F2FD {
+  component [老人档案管理] as m1
+  component [健康数据管理] as m2
+  component [健康预警管理] as m3
+  component [随访计划管理] as m4
+  component [健康评估报告] as m5
+  component [设备台账管理] as m6
+  component [报表统计与决策] as m7
+}
+
+package "数据层" #F3E5F5 {
+  database "MySQL 8.0\n(21张业务表 / smart_elderly_care)" as mysql
+  database "Redis 7.x\n(Token缓存 / 菜单缓存)" as redis_data
+  file "Excel导出\n(Apache POI)" as excel
+}
+
+package "基础设施层" #ECEFF1 {
+  component [Nginx\n(反向代理 + 静态资源)] as nginx
+  component [Docker\n(容器化部署)] as docker
+  component [Spring Boot\n(内嵌Tomcat)] as tomcat
+  component [Actuator\n(健康检查)] as actuator
+}
+
+vue -down-> jwt : HTTP / Token Header
+cors -down-> aop : Request
+aop -down-> m1 : UserContext
+aop -down-> m2
+aop -down-> m3
+aop -down-> m4
+aop -down-> m5
+aop -down-> m6
+aop -down-> m7
+m1 -down-> mysql : MyBatis-Plus
+m2 -down-> mysql
+m3 -down-> redis_data : Jedis
+m4 -down-> mysql
+m5 -down-> mysql
+m6 -down-> mysql
+m7 -down-> mysql
+m7 -down-> excel
+
+note right of m3
+  <b>铁律2规范:</b>
+  模块间通过Service接口交互
+  禁止直接注入其他域Mapper
+end note
+
+@enduml

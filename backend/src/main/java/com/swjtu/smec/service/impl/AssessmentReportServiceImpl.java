@@ -41,6 +41,13 @@ public class AssessmentReportServiceImpl
                .orderByDesc(AssessmentReport::getCreateTime);
         Page<AssessmentReport> page = new Page<>(pageNo, pageSize);
         IPage<AssessmentReport> result = this.baseMapper.selectPage(page, wrapper);
+        // 填充老人姓名和模板名称
+        for (AssessmentReport r : result.getRecords()) {
+            Elderly e = elderlyService.getById(r.getElderlyId());
+            if (e != null) r.setElderlyName(e.getName());
+            AssessmentTemplate t = templateMapper.selectById(r.getTemplateId());
+            if (t != null) r.setTemplateName(t.getTemplateName());
+        }
         return CommonResult.success(result.getRecords(), result.getTotal());
     }
 

@@ -1,0 +1,69 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName Microsoft YaHei
+skinparam defaultFontSize 14
+skinparam defaultFontColor #333333
+skinparam ArrowThickness 2
+skinparam NodeBackgroundColor #E8F5E9
+skinparam NodeBorderColor #2E7D32
+skinparam DatabaseBackgroundColor #E3F2FD
+skinparam DatabaseBorderColor #1565C0
+skinparam ActorBorderColor #5D4037
+
+title 智慧医养管理系统 — 部署拓扑图
+
+rectangle "内网 / VPN 安全边界" as net #F5F5F5 {
+
+  actor "管理员 / 医生\n(Chrome 浏览器)" as user
+
+  node "Nginx 反向代理\n192.168.x.10 : 80" as nginx #C8E6C9 {
+    component "前端静态资源\n(dist/ 目录)" as static
+    component "API 路由转发\n(/api/* -> :8080)" as api_route
+  }
+
+  node "应用服务器-1\n192.168.x.11 : 8080" as app1 #FFF9C4 {
+    component "Spring Boot\nSMECMS v1.0" as boot1
+  }
+
+  node "应用服务器-2\n192.168.x.12 : 8080" as app2 #FFF9C4 {
+    component "Spring Boot\nSMECMS v1.0" as boot2
+  }
+
+  database "MySQL Master\n192.168.x.20 : 3306\n(smart_elderly_care)" as mysql_m #E3F2FD
+
+  database "MySQL Slave\n192.168.x.21 : 3306\n(只读 / 报表查询)" as mysql_s #BBDEFB
+
+  rectangle "Redis Sentinel 哨兵集群" as redis_cluster #FFE0B2 {
+    database "Redis Master\n:6379" as redis_m
+    database "Redis Slave-1\n:6380" as redis_s1
+    database "Redis Slave-2\n:6381" as redis_s2
+    component "Sentinel x3\n(监控 + 故障转移)" as sentinel
+  }
+}
+
+user -right-> nginx : HTTPS
+nginx -down-> app1 : /api/*\n(least_conn 负载均衡)
+nginx -down-> app2 : /api/*\n(least_conn 负载均衡)
+
+app1 -down-> mysql_m : JDBC (写)
+app2 -down-> mysql_m : JDBC (写)
+app1 -down-> mysql_s : JDBC (读)
+app2 -down-> mysql_s : JDBC (读)
+
+app1 -down-> redis_cluster : Jedis (读写)
+app2 -down-> redis_cluster : Jedis (读写)
+
+mysql_m -down-> mysql_s : "主从复制 (Binlog)"
+
+note right of redis_cluster
+  <b>Redis Sentinel 故障转移:</b>
+  主节点故障时 Sentinel 自动
+  选举新主节点,应用端通过
+  Sentinel 发现新地址
+  ========
+  <b>Nginx 健康检查:</b>
+  max_fails=3 fail_timeout=30s
+  故障节点自动摘除
+end note
+
+@enduml
