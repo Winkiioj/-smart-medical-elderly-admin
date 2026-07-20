@@ -1,0 +1,12 @@
+{
+  "doctor_id": 3,
+  "records": [
+    {"elderly_id": 1, "measure_date": "2026-07-19", "measure_time": "08:30", "systolic_pressure": 155, "diastolic_pressure": 92, "heart_rate": 85, "blood_sugar": 7.2, "blood_oxygen": 94, "weight": 60.0, "height": 158.0, "temperature": 36.7, "remark": "降压药调整后复测，血压仍偏高"},
+    {"elderly_id": 2, "measure_date": "2026-07-19", "measure_time": "09:00", "systolic_pressure": 138, "diastolic_pressure": 84, "heart_rate": 74, "blood_sugar": 5.8, "blood_oxygen": 98, "weight": 68.5, "height": 170.0, "temperature": 36.4, "remark": ""},
+    {"elderly_id": 3, "measure_date": "2026-07-19", "measure_time": "09:30", "systolic_pressure": 150, "diastolic_pressure": 88, "heart_rate": 80, "blood_oxygen": 96, "weight": 57.0, "height": 165.0, "temperature": 36.6, "remark": "独居老人，电话随访正常"},
+    {"elderly_id": 4, "measure_date": "2026-07-19", "measure_time": "10:00", "systolic_pressure": 118, "diastolic_pressure": 74, "heart_rate": 70, "blood_sugar": 5.1, "blood_oxygen": 99, "weight": 49.0, "height": 155.0, "temperature": 36.3, "remark": ""},
+    {"elderly_id": 5, "measure_date": "2026-07-19", "measure_time": "08:00", "systolic_pressure": 178, "diastolic_pressure": 103, "heart_rate": 90, "blood_sugar": 5.9, "blood_oxygen": 90, "weight": 63.2, "height": 168.0, "temperature": 37.0, "remark": "血压危象！家属已送急诊，建议立即住院"},
+    {"elderly_id": 6, "measure_date": "2026-07-19", "measure_time": "08:15", "systolic_pressure": 130, "diastolic_pressure": 82, "heart_rate": 74, "blood_sugar": 7.5, "blood_oxygen": 97, "weight": 71.0, "height": 172.0, "temperature": 36.5, "remark": "空腹血糖偏高，继续监测"},
+    {"elderly_id": 7, "measure_date": "2026-07-19", "measure_time": "10:30", "systolic_pressure": 125, "diastolic_pressure": 78, "heart_rate": 72, "blood_sugar": 5.5, "blood_oxygen": 98, "weight": 68.0, "height": 168.0, "temperature": 36.4, "remark": ""}
+  ]
+}

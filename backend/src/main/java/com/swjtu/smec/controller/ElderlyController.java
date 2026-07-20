@@ -32,21 +32,25 @@ public class ElderlyController {
     /**
      * 分页查询老人列表
      */
-    @Operation(summary = "分页查询老人列表")
+    @Operation(summary = "分页查询老人列表(多维度筛选)")
     @GetMapping("/list")
     public CommonResult<IPage<Elderly>> list(
             @RequestParam Long doctorId,
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) String community,
+            @RequestParam(required = false) Integer gender,
             @RequestParam(required = false) Integer ageMin,
             @RequestParam(required = false) Integer ageMax,
+            @RequestParam(required = false) Integer status,
+            @RequestParam(required = false) Long tagId,
             @RequestParam(required = false) String startDate,
             @RequestParam(required = false) String endDate,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "20") int size) {
         LocalDate sd = startDate != null ? LocalDate.parse(startDate) : null;
         LocalDate ed = endDate != null ? LocalDate.parse(endDate) : null;
-        IPage<Elderly> result = elderlyService.page(doctorId, keyword, community, ageMin, ageMax, sd, ed, page, size);
+        IPage<Elderly> result = elderlyService.page(doctorId, keyword, community,
+                gender, ageMin, ageMax, status, tagId, sd, ed, page, size);
         return CommonResult.success(result);
     }
 

@@ -15,7 +15,8 @@ public interface ElderlyService extends IService<Elderly> {
      * 分页查询（按社区 + 姓名/身份证 + 年龄段筛选）
      */
     IPage<Elderly> page(Long doctorId, String keyword, String community,
-                        Integer ageMin, Integer ageMax,
+                        Integer gender, Integer ageMin, Integer ageMax,
+                        Integer status, Long tagId,
                         LocalDate startDate, LocalDate endDate,
                         int page, int size);
 
