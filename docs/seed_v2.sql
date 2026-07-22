@@ -381,30 +381,30 @@ INSERT INTO warning_rule (id, rule_name, indicator_type, indicator_name, min_val
 -- ============================================================
 INSERT INTO warning_record (id, elderly_id, rule_id, alert_type, alert_level, alert_title, trigger_value, threshold_value, status, handler_id, handle_opinion, handle_result, handle_time, create_time) VALUES
 -- 花园社区（7条）
-(1,  1, 1, 'systolic_pressure', 3, '张建国-收缩压重度超标', '185mmHg', '>180mmHg', 0, NULL, NULL, NULL, CURDATE()),
+(1,  1, 1, 'systolic_pressure', 3, '张建国-收缩压重度超标', '185mmHg', '>180mmHg', 0, NULL, NULL, NULL, NULL, CURDATE()),
 (2,  5, 2, 'systolic_pressure', 2, '陈国栋-收缩压中度超标', '172mmHg', '>160mmHg', 1, 5, '已联系确认', NULL, NOW(), DATE_SUB(CURDATE(), INTERVAL 1 DAY)),
 (3,  3, 2, 'systolic_pressure', 2, '王德福-收缩压中度超标', '165mmHg', '>160mmHg', 2, 6, '已安排复诊-确诊高血压', '已联系并确认就医', DATE_SUB(CURDATE(), INTERVAL 3 DAY), DATE_SUB(CURDATE(), INTERVAL 5 DAY)),
-(4,  7, 3, 'systolic_pressure', 1, '周文斌-收缩压轻度偏高', '145mmHg', '>140mmHg', 0, NULL, NULL, NULL, DATE_SUB(CURDATE(), INTERVAL 1 DAY)),
+(4,  7, 3, 'systolic_pressure', 1, '周文斌-收缩压轻度偏高', '145mmHg', '>140mmHg', 0, NULL, NULL, NULL, NULL, DATE_SUB(CURDATE(), INTERVAL 1 DAY)),
 (5,  2, 6, 'blood_sugar',       2, '李秀兰-血糖偏高', '11.8mmol/L', '>11.0mmol/L', 1, 5, '建议调整用药', NULL, NOW(), DATE_SUB(CURDATE(), INTERVAL 2 DAY)),
 (6,  4, 1, 'systolic_pressure', 3, '赵美华-收缩压重度超标', '188mmHg', '>180mmHg', 3, 6, '关闭原因: 误报-测量操作不当', NULL, DATE_SUB(CURDATE(), INTERVAL 4 DAY), DATE_SUB(CURDATE(), INTERVAL 7 DAY)),
-(7,  9, 5, 'blood_oxygen',      3, '孙志强-血氧偏低', '93%', '<93%', 0, NULL, NULL, NULL, DATE_SUB(CURDATE(), INTERVAL 0 DAY)),
+(7,  9, 5, 'blood_oxygen',      3, '孙志强-血氧偏低', '93%', '<93%', 0, NULL, NULL, NULL, NULL, DATE_SUB(CURDATE(), INTERVAL 0 DAY)),
 
 -- 金龙社区（7条）
-(8, 31, 4, 'heart_rate',        2, '金龙福-心率异常(过缓)', '45bpm', '<48bpm', 0, NULL, NULL, NULL, CURDATE()),
+(8, 31, 4, 'heart_rate',        2, '金龙福-心率异常(过缓)', '45bpm', '<48bpm', 0, NULL, NULL, NULL, NULL, CURDATE()),
 (9, 33, 5, 'blood_oxygen',      3, '向美华-血氧偏低', '91%', '<93%', 1, 7, '正在处理中', NULL, NOW(), DATE_SUB(CURDATE(), INTERVAL 2 DAY)),
 (10, 35, 2, 'systolic_pressure', 2, '范建国-收缩压中度超标', '168mmHg', '>160mmHg', 2, 7, '确诊冠心病-建议转专科', '已安排随访跟进', DATE_SUB(CURDATE(), INTERVAL 5 DAY), DATE_SUB(CURDATE(), INTERVAL 8 DAY)),
 (11, 39, 1, 'systolic_pressure', 3, '蒋志宏-收缩压重度超标', '190mmHg', '>180mmHg', 1, 8, '已通知家属', NULL, NOW(), DATE_SUB(CURDATE(), INTERVAL 1 DAY)),
 (12, 41, 3, 'systolic_pressure', 1, '严国平-收缩压轻度偏高', '148mmHg', '>140mmHg', 3, 7, '关闭原因: 误报-指标正常波动', NULL, DATE_SUB(CURDATE(), INTERVAL 3 DAY), DATE_SUB(CURDATE(), INTERVAL 6 DAY)),
-(13, 36, 6, 'blood_sugar',       2, '石桂花-血糖偏高', '12.0mmol/L', '>11.0mmol/L', 0, NULL, NULL, NULL, DATE_SUB(CURDATE(), INTERVAL 0 DAY)),
+(13, 36, 6, 'blood_sugar',       2, '石桂花-血糖偏高', '12.0mmol/L', '>11.0mmol/L', 0, NULL, NULL, NULL, NULL, DATE_SUB(CURDATE(), INTERVAL 0 DAY)),
 (14, 42, 2, 'systolic_pressure', 2, '乐秀兰-收缩压中度超标', '175mmHg', '>160mmHg', 1, 8, '安排随访', NULL, NOW(), DATE_SUB(CURDATE(), INTERVAL 3 DAY)),
 
 -- 阳光社区（7条）
-(15, 61, 6, 'blood_sugar',       2, '阳光福-血糖偏高', '12.5mmol/L', '>11.0mmol/L', 0, NULL, NULL, NULL, CURDATE()),
+(15, 61, 6, 'blood_sugar',       2, '阳光福-血糖偏高', '12.5mmol/L', '>11.0mmol/L', 0, NULL, NULL, NULL, NULL, CURDATE()),
 (16, 69, 1, 'systolic_pressure', 3, '陶志宏-收缩压重度超标', '190mmHg', '>180mmHg', 1, 9, '紧急处理中', NULL, NOW(), DATE_SUB(CURDATE(), INTERVAL 1 DAY)),
 (17, 65, 2, 'systolic_pressure', 2, '梁建国-收缩压中度超标', '170mmHg', '>160mmHg', 2, 10, '完成随访，血压稳定', '已联系并确认就医', DATE_SUB(CURDATE(), INTERVAL 6 DAY), DATE_SUB(CURDATE(), INTERVAL 10 DAY)),
 (18, 71, 5, 'blood_oxygen',      3, '毛国平-血氧偏低', '92%', '<93%', 1, 10, '设备检查中', NULL, NOW(), DATE_SUB(CURDATE(), INTERVAL 2 DAY)),
 (19, 63, 3, 'systolic_pressure', 1, '罗志强-收缩压轻度偏高', '148mmHg', '>140mmHg', 3, 11, '关闭原因: 其他-老人已外出', NULL, DATE_SUB(CURDATE(), INTERVAL 5 DAY), DATE_SUB(CURDATE(), INTERVAL 8 DAY)),
-(20, 62, 6, 'blood_sugar',       2, '丁秀英-血糖偏高', '11.5mmol/L', '>11.0mmol/L', 0, NULL, NULL, NULL, DATE_SUB(CURDATE(), INTERVAL 1 DAY)),
+(20, 62, 6, 'blood_sugar',       2, '丁秀英-血糖偏高', '11.5mmol/L', '>11.0mmol/L', 0, NULL, NULL, NULL, NULL, DATE_SUB(CURDATE(), INTERVAL 1 DAY)),
 (21, 75, 1, 'systolic_pressure', 3, '姚永福-收缩压重度超标', '195mmHg', '>180mmHg', 1, 10, '已联系社区医院', NULL, NOW(), DATE_SUB(CURDATE(), INTERVAL 0 DAY));
 
 -- ============================================================
