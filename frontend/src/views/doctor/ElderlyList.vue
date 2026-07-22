@@ -11,8 +11,10 @@
         <el-form-item label="关键词">
           <el-input v-model="filters.keyword" placeholder="姓名 / 身份证号" clearable style="width:180px" @keyup.enter="search" />
         </el-form-item>
-        <el-form-item v-if="!isComAdmin" label="社区">
-          <el-input v-model="filters.community" placeholder="社区名称" clearable style="width:140px" />
+        <el-form-item v-if="isOrgAdmin" label="社区">
+          <el-select v-model="filters.community" placeholder="全部社区" clearable style="width:160px">
+            <el-option v-for="c in communityList" :key="c.id" :label="c.name" :value="c.name" />
+          </el-select>
         </el-form-item>
         <el-form-item label="性别">
           <el-select v-model="filters.gender" placeholder="全部" clearable style="width:90px">
@@ -172,8 +174,10 @@ import { getElderlyList, getElderlyDetail, addElderly, updateElderly } from '@/a
 import { getTagList, getTagsByElderly } from '@/api/tag.js'
 import { ElMessage } from 'element-plus'
 import { getStorage } from '@/utils/localStorage.js'
+import request from '@/utils/request.js'
 
 const route = useRoute()
+const isOrgAdmin = computed(() => getStorage('RoleCode') === 'ORG_ADMIN')
 const isDoctor = computed(() => getStorage('RoleCode') === 'DOCTOR')
 const isComAdmin = computed(() => getStorage('RoleCode') === 'COM_ADMIN')
 const myCommunity = computed(() => getStorage('Community') || '')
@@ -184,8 +188,11 @@ const filters = reactive({
 })
 const tagList = ref([])
 
+const communityList = ref([])
+
 const resetFilters = () => {
-  Object.assign(filters, { keyword: '', community: '', gender: null, ageRange: '', status: null, tagId: null, admissionRange: null })
+  Object.assign(filters, { keyword: '', gender: null, ageRange: '', status: null, tagId: null, admissionRange: null })
+  if (isOrgAdmin.value) filters.community = ''
   search()
 }
 
@@ -283,8 +290,15 @@ const submitForm = async () => {
 const onSelectChange = () => {}
 
 // ===== 初始化 =====
+const loadCommunities = async () => {
+  try {
+    const res = await request({ url: '/api/community/enabled', method: 'get' })
+    if (res.code === 200) communityList.value = res.data || []
+  } catch { communityList.value = [] }
+}
 onMounted(async () => {
   if (isComAdmin.value) filters.community = myCommunity.value
+  if (isOrgAdmin.value) await loadCommunities()
   try {
     const res = await getTagList()
     tagList.value = res.data || []
