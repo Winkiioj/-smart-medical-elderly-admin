@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>智慧医养管理系统 — 社区报表（社区管理员）</title>
+<link rel="stylesheet" href="https://unpkg.com/element-plus/dist/index.css">
+<script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+<script src="https://unpkg.com/element-plus"></script>
+<script src="https://unpkg.com/@element-plus/icons-vue"></script>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'PingFang SC','Microsoft YaHei',sans-serif;background:#f0f2f5}
+.layout{display:flex;min-height:100vh}
+.sidebar{width:220px;background:#001529;color:#fff;flex-shrink:0}
+.sidebar .logo{height:60px;display:flex;align-items:center;padding:0 20px;font-size:16px;font-weight:600;border-bottom:1px solid rgba(255,255,255,.1);color:#fff}
+.sidebar .logo span{color:#409EFF;margin-right:6px}
+.sidebar .menu-item{padding:12px 24px;cursor:pointer;color:rgba(255,255,255,.65);font-size:14px;transition:.2s;display:flex;align-items:center;gap:8px}
+.sidebar .menu-item:hover,.sidebar .menu-item.active{color:#fff;background:#1890ff}
+.sidebar .menu-group{padding:8px 24px;font-size:12px;color:rgba(255,255,255,.35);margin-top:12px}
+.main{flex:1;display:flex;flex-direction:column}
+.header{height:56px;background:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 24px;box-shadow:0 1px 4px rgba(0,0,0,.08)}
+.content{padding:20px 24px;flex:1;overflow-y:auto}
+.stat-cards{display:grid;grid-template-columns:repeat(6,1fr);gap:16px;margin-bottom:20px}
+.stat-card{background:#fff;border-radius:8px;padding:18px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.stat-card .label{font-size:13px;color:#8c8c8c;margin-bottom:8px}
+.stat-card .value{font-size:28px;font-weight:700;color:#262626}
+.stat-card .sub{font-size:12px;color:#8c8c8c;margin-top:4px}
+.section{background:#fff;border-radius:8px;padding:20px;margin-bottom:20px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.section h3{font-size:16px;margin-bottom:16px;color:#262626;padding-bottom:12px;border-bottom:1px solid #f0f0f0}
+.chart-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.chart-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+.chart-box{height:320px}
+</style>
+</head>
+<body>
+<div id="app">
+<div class="layout">
+  <div class="sidebar">
+    <div class="logo"><span>🏥</span> 智慧医养管理</div>
+    <div class="menu-group">社区管理</div>
+    <div class="menu-item"><el-icon><DataAnalysis /></el-icon> Dashboard</div>
+    <div class="menu-item"><el-icon><UserFilled /></el-icon> 医生管理</div>
+    <div class="menu-item"><el-icon><Connection /></el-icon> 老人分配</div>
+    <div class="menu-item active"><el-icon><Document /></el-icon> 报表统计</div>
+    <div class="menu-group">业务功能</div>
+    <div class="menu-item"><el-icon><User /></el-icon> 老人档案</div>
+    <div class="menu-item"><el-icon><Bell /></el-icon> 预警记录</div>
+    <div class="menu-item"><el-icon><Clock /></el-icon> 随访管理</div>
+  </div>
+  <div class="main">
+    <div class="header">
+      <div style="font-size:15px;color:#595959">
+        <el-breadcrumb separator="/">
+          <el-breadcrumb-item>首页</el-breadcrumb-item>
+          <el-breadcrumb-item>报表统计</el-breadcrumb-item>
+        </el-breadcrumb>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px">
+        <el-radio-group v-model="timeRange" size="small">
+          <el-radio-button label="month">本月</el-radio-button>
+          <el-radio-button label="quarter">近三月</el-radio-button>
+          <el-radio-button label="year">本年</el-radio-button>
+        </el-radio-group>
+        <el-button type="primary" size="small" :icon="Download" @click="showExport">导出 Excel</el-button>
+        <el-divider direction="vertical"/>
+        <el-avatar :size="32" style="background:#52c41a">陈</el-avatar>
+        <span style="font-size:14px">陈院长 · 牛市口社区</span>
+      </div>
+    </div>
+    <div class="content">
+
+      <!-- 统计卡片 -->
+      <div class="stat-cards">
+        <div class="stat-card"><div class="label">本社区老人</div><div class="value">1,532</div><div class="sub"><span style="color:#52c41a">+28</span> 本月新增</div></div>
+        <div class="stat-card"><div class="label">签约医生</div><div class="value">8<span style="font-size:16px">人</span></div><div class="sub"><span style="color:#52c41a">+1</span> 本月新增</div></div>
+        <div class="stat-card"><div class="label">预警处理率</div><div class="value">82.3<span style="font-size:16px">%</span></div><div class="sub">已处理 37 / 总数 45</div></div>
+        <div class="stat-card"><div class="label">随访完成率</div><div class="value">85.7<span style="font-size:16px">%</span></div><div class="sub"><span style="color:#52c41a">↑ 2.1%</span> 较上月</div></div>
+        <div class="stat-card"><div class="label">设备在线率</div><div class="value">96.1<span style="font-size:16px">%</span></div><div class="sub">在线 49 / 总计 51</div></div>
+        <div class="stat-card"><div class="label">随访逾期率</div><div class="value">6.8<span style="font-size:16px;color:#ff4d4f">%</span></div><div class="sub"><span style="color:#ff4d4f">↑ 1.2%</span> 需关注</div></div>
+      </div>
+
+      <!-- 老人统计区 -->
+      <div class="section">
+        <h3>👴 老人统计分析</h3>
+        <div class="chart-row">
+          <div class="chart-box" id="age-pie"></div>
+          <div class="chart-box" id="gender-pie"></div>
+        </div>
+        <div style="margin-top:16px">
+          <div class="chart-box" id="monthly-new-trend" style="width:100%"></div>
+        </div>
+      </div>
+
+      <!-- 预警统计区 -->
+      <div class="section">
+        <h3>⚠️ 预警统计分析</h3>
+        <div class="chart-row-3">
+          <div class="chart-box" id="warn-level-pie"></div>
+          <div class="chart-box" id="warn-type-pie"></div>
+          <div class="chart-box" id="warn-trend"></div>
+        </div>
+      </div>
+
+      <!-- 随访统计区 -->
+      <div class="section">
+        <h3>📋 随访统计分析</h3>
+        <div class="chart-row">
+          <div class="chart-box" id="followup-doctor-bar"></div>
+          <div class="chart-box" id="followup-type-pie"></div>
+        </div>
+      </div>
+
+      <!-- 设备统计区 -->
+      <div class="section">
+        <h3>📡 设备统计分析</h3>
+        <div class="chart-row">
+          <div class="chart-box" id="device-type-pie"></div>
+          <div class="chart-box" id="device-trend"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- 导出弹窗 -->
+<el-dialog v-model="exportVisible" title="导出本社区报表" width="460px">
+  <div style="padding:8px 0">
+    <p style="color:#8c8c8c;font-size:13px;margin-bottom:16px">当前筛选：<strong>{{timeLabel}}</strong> · 牛市口社区</p>
+    <el-checkbox-group v-model="exportSections">
+      <div style="margin-bottom:12px"><el-checkbox label="elderly">老人统计（年龄/性别/新增趋势）</el-checkbox></div>
+      <div style="margin-bottom:12px"><el-checkbox label="warning">预警统计（级别/类型/趋势）</el-checkbox></div>
+      <div style="margin-bottom:12px"><el-checkbox label="followup">随访统计（医生对比/方式分布）</el-checkbox></div>
+      <div style="margin-bottom:12px"><el-checkbox label="device">设备统计（类型分布/趋势）</el-checkbox></div>
+    </el-checkbox-group>
+  </div>
+  <template #footer>
+    <el-button @click="exportVisible=false">取消</el-button>
+    <el-button type="primary" @click="doExport" :disabled="exportSections.length===0">确认导出</el-button>
+  </template>
+</el-dialog>
+</div>
+
+<script>
+const { createApp, ref, computed, onMounted, nextTick } = Vue
+const app = createApp({
+  setup(){
+    const timeRange = ref('month')
+    const exportVisible = ref(false)
+    const exportSections = ref(['elderly','warning','followup','device'])
+    const timeLabel = computed(()=>{ const m={month:'本月',quarter:'近三月',year:'本年'}; return m[timeRange.value] })
+
+    function showExport(){ exportVisible.value=true }
+    function doExport(){
+      ElementPlus.ElMessage.success('文件生成中...')
+      setTimeout(()=>{ ElementPlus.ElMessage.success('导出成功：智慧医养管理平台_牛市口社区报表_20260715.xlsx'); exportVisible.value=false },1200)
+    }
+
+    onMounted(()=>{
+      nextTick(()=>{
+        // 老人年龄分布
+        echarts.init(document.getElementById('age-pie')).setOption({
+          title:{text:'老人年龄分布',left:'center',textStyle:{fontSize:14}},
+          tooltip:{trigger:'item'},
+          series:[{type:'pie',radius:['40%','70%'],label:{formatter:'{b}: {c}人\n({d}%)'},
+            data:[{value:156,name:'60-69岁'},{value:482,name:'70-79岁'},{value:638,name:'80-89岁'},{value:213,name:'90-99岁'},{value:43,name:'100岁+'}]}]
+        })
+
+        // 性别比例
+        echarts.init(document.getElementById('gender-pie')).setOption({
+          title:{text:'性别比例',left:'center',textStyle:{fontSize:14}},
+          tooltip:{trigger:'item'},
+          series:[{type:'pie',radius:['40%','70%'],label:{formatter:'{b}: {c}人 ({d}%)'},
+            data:[{value:643,name:'男'},{value:889,name:'女'}],
+            itemStyle:{color:params=>params.name==='男'?'#409EFF':'#ff69b4'}}]
+        })
+
+        // 近6月新增趋势
+        echarts.init(document.getElementById('monthly-new-trend')).setOption({
+          title:{text:'近6个月新增老人趋势',left:'center',textStyle:{fontSize:14}},
+          tooltip:{},xAxis:{type:'category',data:['2月','3月','4月','5月','6月','7月']},yAxis:{type:'value'},
+          series:[{type:'line',data:[18,22,20,25,30,28],smooth:true,itemStyle:{color:'#409EFF'},areaStyle:{color:'rgba(64,158,255,0.1)'}}],
+          grid:{left:50,right:20,top:50,bottom:30}
+        })
+
+        // 预警级别分布
+        echarts.init(document.getElementById('warn-level-pie')).setOption({
+          title:{text:'按预警级别分布',left:'center',textStyle:{fontSize:14}},
+          tooltip:{},series:[{type:'pie',radius:'60%',
+            data:[{value:18,name:'轻度',itemStyle:{color:'#52c41a'}},{value:17,name:'中度',itemStyle:{color:'#faad14'}},{value:10,name:'重度',itemStyle:{color:'#ff4d4f'}}]}]
+        })
+
+        // 预警类型分布
+        echarts.init(document.getElementById('warn-type-pie')).setOption({
+          title:{text:'按预警类型分布',left:'center',textStyle:{fontSize:14}},
+          tooltip:{},series:[{type:'pie',radius:'60%',
+            data:[{value:20,name:'血压异常'},{value:12,name:'血糖异常'},{value:7,name:'心率异常'},{value:4,name:'血氧偏低'},{value:2,name:'BMI超重'}],
+            itemStyle:{color:params=>['#f56c6c','#e6a23c','#409eff','#67c23a','#909399'][params.dataIndex]}}]
+        })
+
+        // 预警趋势
+        echarts.init(document.getElementById('warn-trend')).setOption({
+          title:{text:'近6月预警趋势',left:'center',textStyle:{fontSize:14}},
+          tooltip:{},xAxis:{type:'category',data:['2月','3月','4月','5月','6月','7月']},yAxis:{type:'value'},
+          series:[
+            {name:'预警总数',type:'bar',data:[35,38,42,40,48,45],barWidth:14,itemStyle:{color:'#faad14'}},
+            {name:'已处理',type:'bar',data:[30,33,38,36,40,37],barWidth:14,itemStyle:{color:'#52c41a'}}
+          ],
+          grid:{left:50,right:20,top:50,bottom:30}
+        })
+
+        // 各医生随访完成率
+        echarts.init(document.getElementById('followup-doctor-bar')).setOption({
+          title:{text:'各医生随访完成率 (%)',left:'center',textStyle:{fontSize:14}},
+          tooltip:{},xAxis:{type:'category',data:['李医生','王医生','张医生','赵医生','刘医生','周医生','吴医生'],axisLabel:{fontSize:11}},
+          yAxis:{type:'value',min:0,max:100},
+          series:[{type:'bar',data:[89.1,82.3,93.7,80.5,85.8,96.0,73.2],
+            itemStyle:{color:params=>params.value>=85?'#52c41a':params.value>=75?'#faad14':'#ff4d4f'},barWidth:24}],
+          grid:{left:50,right:20,top:50,bottom:40}
+        })
+
+        // 随访方式分布
+        echarts.init(document.getElementById('followup-type-pie')).setOption({
+          title:{text:'随访方式分布',left:'center',textStyle:{fontSize:14}},
+          tooltip:{},series:[{type:'pie',radius:'60%',
+            data:[{value:186,name:'电话随访',itemStyle:{color:'#409EFF'}},{value:98,name:'上门随访',itemStyle:{color:'#52c41a'}},{value:52,name:'门诊随访',itemStyle:{color:'#e6a23c'}}]}]
+        })
+
+        // 设备类型分布
+        echarts.init(document.getElementById('device-type-pie')).setOption({
+          title:{text:'设备类型分布',left:'center',textStyle:{fontSize:14}},
+          tooltip:{},series:[{type:'pie',radius:['40%','70%'],
+            data:[{value:18,name:'血压计'},{value:15,name:'智能腕表'},{value:10,name:'血糖仪'},{value:5,name:'血氧仪'},{value:3,name:'体温计'}],
+            itemStyle:{color:params=>['#409eff','#52c41a','#e6a23c','#f56c6c','#909399'][params.dataIndex]}}]
+        })
+
+        // 设备告警趋势
+        echarts.init(document.getElementById('device-trend')).setOption({
+          title:{text:'近6月设备告警趋势',left:'center',textStyle:{fontSize:14}},
+          tooltip:{},xAxis:{type:'category',data:['2月','3月','4月','5月','6月','7月']},yAxis:{type:'value'},
+          series:[{type:'line',data:[5,3,7,4,6,3],smooth:true,itemStyle:{color:'#ff4d4f'},areaStyle:{color:'rgba(255,77,79,0.1)'}}],
+          grid:{left:50,right:20,top:50,bottom:30}
+        })
+      })
+    })
+
+    return {timeRange,exportVisible,exportSections,timeLabel,showExport,doExport}
+  }
+})
+app.use(ElementPlus)
+app.mount('#app')
+</script>
+</body>
+</html>

@@ -18,7 +18,7 @@ public interface WarningRecordService extends IService<WarningRecord> {
     int closePendingByDoctorId(Long doctorId);
 
     // ===== UC-DOC-05 预警处理 =====
-    CommonResult pageByDoctor(int pageNo, int pageSize, Long doctorId,
+    CommonResult pageByDoctor(int pageNo, int pageSize, Long doctorId, String community,
                               Integer alertLevel, String alertType, Integer status,
                               String startTime, String endTime);
     CommonResult getDetailWithElderly(Long id);

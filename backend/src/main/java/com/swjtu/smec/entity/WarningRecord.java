@@ -27,4 +27,7 @@ public class WarningRecord {
 
     @TableField(exist = false)
     private String elderlyName;
+
+    @TableField(exist = false)
+    private String handlerName;
 }

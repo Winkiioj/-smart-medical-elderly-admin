@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>智慧医养管理系统 — 全局报表（机构管理员）</title>
+<link rel="stylesheet" href="https://unpkg.com/element-plus/dist/index.css">
+<script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+<script src="https://unpkg.com/element-plus"></script>
+<script src="https://unpkg.com/@element-plus/icons-vue"></script>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'PingFang SC','Microsoft YaHei',sans-serif;background:#f0f2f5}
+.layout{display:flex;min-height:100vh}
+.sidebar{width:220px;background:#001529;color:#fff;flex-shrink:0}
+.sidebar .logo{height:60px;display:flex;align-items:center;padding:0 20px;font-size:16px;font-weight:600;border-bottom:1px solid rgba(255,255,255,.1);color:#fff}
+.sidebar .logo span{color:#409EFF;margin-right:6px}
+.sidebar .menu-item{padding:12px 24px;cursor:pointer;color:rgba(255,255,255,.65);font-size:14px;transition:.2s;display:flex;align-items:center;gap:8px}
+.sidebar .menu-item:hover,.sidebar .menu-item.active{color:#fff;background:#1890ff}
+.sidebar .menu-group{padding:8px 24px;font-size:12px;color:rgba(255,255,255,.35);margin-top:12px}
+.main{flex:1;display:flex;flex-direction:column}
+.header{height:56px;background:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 24px;box-shadow:0 1px 4px rgba(0,0,0,.08)}
+.header .user{display:flex;align-items:center;gap:8px;font-size:14px}
+.content{padding:20px 24px;flex:1;overflow-y:auto}
+.stat-cards{display:grid;grid-template-columns:repeat(6,1fr);gap:16px;margin-bottom:20px}
+.stat-card{background:#fff;border-radius:8px;padding:18px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.stat-card .label{font-size:13px;color:#8c8c8c;margin-bottom:8px}
+.stat-card .value{font-size:28px;font-weight:700;color:#262626}
+.stat-card .sub{font-size:12px;color:#8c8c8c;margin-top:4px}
+.stat-card .sub .up{color:#52c41a}
+.stat-card .sub .down{color:#ff4d4f}
+.section{background:#fff;border-radius:8px;padding:20px;margin-bottom:20px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.section h3{font-size:16px;margin-bottom:16px;color:#262626;padding-bottom:12px;border-bottom:1px solid #f0f0f0}
+.table-wrap{overflow-x:auto}
+.row-warn{background:#fffbe6!important}
+.row-danger{background:#fff2f0!important}
+.chart-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+.chart-box{height:320px}
+.tag-cell{display:inline-block;padding:2px 8px;border-radius:4px;font-size:12px}
+.tag-red{background:#fff2f0;color:#ff4d4f;border:1px solid #ffccc7}
+.tag-yellow{background:#fffbe6;color:#faad14;border:1px solid #ffe58f}
+.tag-green{background:#f6ffed;color:#52c41a;border:1px solid #b7eb8f}
+.community-detail{padding:16px;background:#fafafa;border-radius:8px;margin-top:16px}
+</style>
+</head>
+<body>
+<div id="app">
+<div class="layout">
+  <!-- 侧边栏 -->
+  <div class="sidebar">
+    <div class="logo"><span>🏥</span> 智慧医养管理</div>
+    <div class="menu-group">导航菜单</div>
+    <div class="menu-item"><el-icon><DataAnalysis /></el-icon> Dashboard</div>
+    <div class="menu-item active"><el-icon><Document /></el-icon> 报表统计</div>
+    <div class="menu-group">系统管理</div>
+    <div class="menu-item"><el-icon><User /></el-icon> 用户管理</div>
+    <div class="menu-item"><el-icon><Setting /></el-icon> 系统设置</div>
+  </div>
+  <!-- 主内容 -->
+  <div class="main">
+    <div class="header">
+      <div style="font-size:15px;color:#595959">
+        <el-breadcrumb separator="/">
+          <el-breadcrumb-item>首页</el-breadcrumb-item>
+          <el-breadcrumb-item>报表统计</el-breadcrumb-item>
+          <el-breadcrumb-item>社区对比</el-breadcrumb-item>
+        </el-breadcrumb>
+      </div>
+      <div class="user">
+        <el-badge :value="3" :max="99"><el-icon :size="20"><Bell /></el-icon></el-badge>
+        <el-avatar :size="32" style="background:#409EFF">张</el-avatar>
+        <span>张主任（机构管理员）</span>
+      </div>
+    </div>
+    <div class="content">
+
+      <!-- 时间筛选 -->
+      <div style="margin-bottom:16px;display:flex;align-items:center;gap:12px">
+        <span style="font-size:14px;color:#595959">时间范围：</span>
+        <el-radio-group v-model="timeRange" size="small" @change="refreshData">
+          <el-radio-button label="month">本月</el-radio-button>
+          <el-radio-button label="quarter">近三月</el-radio-button>
+          <el-radio-button label="halfyear">近半年</el-radio-button>
+          <el-radio-button label="year">本年</el-radio-button>
+        </el-radio-group>
+        <el-button type="primary" size="small" :icon="Download" @click="showExportDialog" style="margin-left:auto">导出 Excel</el-button>
+      </div>
+
+      <!-- 统计卡片 -->
+      <div class="stat-cards">
+        <div class="stat-card">
+          <div class="label">接入社区数</div>
+          <div class="value">8</div>
+          <div class="sub"><span class="up">+1</span> 较上季度</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">全区老人总数</div>
+          <div class="value">8,532</div>
+          <div class="sub"><span class="up">↑ 126</span> 本月新增</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">签约医生数</div>
+          <div class="value">42</div>
+          <div class="sub"><span class="up">+3</span> 本月新增</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">设备在线率</div>
+          <div class="value">94.2<span style="font-size:16px">%</span></div>
+          <div class="sub">在线 382 / 总计 405</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">预警处理率</div>
+          <div class="value">78.6<span style="font-size:16px;color:#faad14">%</span></div>
+          <div class="sub"><span class="down">↓ 5.3%</span> 较上月</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">随访完成率</div>
+          <div class="value">85.1<span style="font-size:16px">%</span></div>
+          <div class="sub"><span class="up">↑ 2.1%</span> 较上月</div>
+        </div>
+      </div>
+
+      <!-- 社区对比表格 -->
+      <div class="section">
+        <h3>📊 各社区指标对比</h3>
+        <div class="table-wrap">
+          <table style="width:100%;border-collapse:collapse;font-size:13px">
+            <thead>
+              <tr style="background:#fafafa;text-align:left">
+                <th style="padding:12px;border-bottom:2px solid #f0f0f0" v-for="h in tableHeaders" :key="h">{{h}}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="c in communities" :key="c.name" :class="{'row-danger':c.warnRate<60,'row-warn':c.warnRate>=60&&c.warnRate<80}"
+                  style="cursor:pointer" @click="selectedCommunity=c.name">
+                <td style="padding:10px 12px;border-bottom:1px solid #f0f0f0">{{c.name}}</td>
+                <td style="padding:10px 12px;border-bottom:1px solid #f0f0f0;font-weight:600">{{c.elderlyCount}}</td>
+                <td style="padding:10px 12px;border-bottom:1px solid #f0f0f0">{{c.newThisMonth}}</td>
+                <td style="padding:10px 12px;border-bottom:1px solid #f0f0f0">{{c.doctorCount}}</td>
+                <td style="padding:10px 12px;border-bottom:1px solid #f0f0f0">{{c.warningTotal}}</td>
+                <td style="padding:10px 12px;border-bottom:1px solid #f0f0f0">
+                  <span :class="{'tag-red':c.warnRate<60,'tag-yellow':c.warnRate<80,'tag-green':c.warnRate>=80}" class="tag-cell">{{c.warnRate}}%</span>
+                </td>
+                <td style="padding:10px 12px;border-bottom:1px solid #f0f0f0">{{c.followupRate}}%</td>
+                <td style="padding:10px 12px;border-bottom:1px solid #f0f0f0">{{c.deviceRate}}%</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- 选中社区的详细指标 -->
+        <div class="community-detail" v-if="selectedCommunity" style="margin-top:16px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+            <strong>{{selectedCommunity}} · 详细指标</strong>
+            <el-button size="small" text @click="selectedCommunity=''">收起</el-button>
+          </div>
+          <div class="chart-row">
+            <div class="chart-box" id="detail-pie"></div>
+            <div class="chart-box" id="detail-gender"></div>
+            <div class="chart-box" id="detail-trend"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 图表对比 -->
+      <div class="section">
+        <h3>📈 可视化对比</h3>
+        <div class="chart-row">
+          <div class="chart-box" id="bar-elderly"></div>
+          <div class="chart-box" id="bar-warn"></div>
+          <div class="chart-box" id="bar-followup"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- 导出弹窗 -->
+<el-dialog v-model="exportVisible" title="导出数据报表" width="480px">
+  <div style="padding:8px 0">
+    <p style="color:#8c8c8c;font-size:13px;margin-bottom:16px">当前筛选：<strong>{{timeLabel}}</strong> · 全区</p>
+    <el-checkbox-group v-model="exportSheets">
+      <div style="margin-bottom:12px"><el-checkbox label="summary">社区对比汇总表</el-checkbox></div>
+      <div style="margin-bottom:12px"><el-checkbox label="detail">各社区详细指标</el-checkbox></div>
+      <div style="margin-bottom:12px"><el-checkbox label="elderly">老人基础数据明细</el-checkbox></div>
+      <div style="margin-bottom:12px"><el-checkbox label="warning">预警记录明细</el-checkbox></div>
+    </el-checkbox-group>
+  </div>
+  <template #footer>
+    <el-button @click="exportVisible=false">取消</el-button>
+    <el-button type="primary" @click="doExport" :disabled="exportSheets.length===0">确认导出</el-button>
+  </template>
+</el-dialog>
+</div>
+
+<script>
+const { createApp, ref, computed, onMounted, nextTick } = Vue
+const app = createApp({
+  setup(){
+    const timeRange = ref('month')
+    const selectedCommunity = ref('')
+    const exportVisible = ref(false)
+    const exportSheets = ref(['summary','detail'])
+
+    const timeLabel = computed(()=>{
+      const m = {month:'本月',quarter:'近三月',halfyear:'近半年',year:'本年'}
+      return m[timeRange.value]||'本月'
+    })
+
+    const tableHeaders = ['社区名称','老人数','本月新增','医生数','预警总数','预警处理率','随访完成率','设备在线率']
+
+    const communities = ref([
+      {name:'牛市口社区',elderlyCount:1532,newThisMonth:28,doctorCount:8,warningTotal:45,warnRate:71.1,followupRate:82.3,deviceRate:96.1},
+      {name:'春熙路社区',elderlyCount:1208,newThisMonth:15,doctorCount:6,warningTotal:32,warnRate:84.4,followupRate:88.7,deviceRate:93.5},
+      {name:'东光社区',elderlyCount:987,newThisMonth:12,doctorCount:5,warningTotal:28,warnRate:92.9,followupRate:91.2,deviceRate:97.8},
+      {name:'成龙路社区',elderlyCount:1102,newThisMonth:22,doctorCount:6,warningTotal:38,warnRate:68.4,followupRate:79.5,deviceRate:91.3},
+      {name:'狮子山社区',elderlyCount:892,newThisMonth:10,doctorCount:4,warningTotal:18,warnRate:55.6,followupRate:74.8,deviceRate:88.9},
+      {name:'沙河社区',elderlyCount:1056,newThisMonth:18,doctorCount:5,warningTotal:35,warnRate:82.9,followupRate:86.5,deviceRate:95.2},
+      {name:'双桂路社区',elderlyCount:968,newThisMonth:14,doctorCount:5,warningTotal:22,warnRate:77.3,followupRate:83.6,deviceRate:92.7},
+      {name:'龙舟路社区',elderlyCount:787,newThisMonth:7,doctorCount:3,warningTotal:15,warnRate:86.7,followupRate:90.4,deviceRate:94.0},
+    ])
+
+    function refreshData(){ /* 模拟刷新 */ }
+
+    function showExportDialog(){ exportVisible.value=true }
+    function doExport(){
+      ElementPlus.ElMessage.success('文件生成中，请稍候...')
+      setTimeout(()=>{
+        ElementPlus.ElMessage.success('导出成功！文件名：智慧医养管理平台_报表_20260715_143200.xlsx')
+        exportVisible.value=false
+      },1500)
+    }
+
+    function renderCharts(){
+      const c = communities.value
+
+      // 各社区老人数柱状图
+      const bar1 = echarts.init(document.getElementById('bar-elderly'))
+      bar1.setOption({
+        title:{text:'各社区老人数量',textStyle:{fontSize:14},left:'center'},
+        tooltip:{},
+        xAxis:{type:'category',data:c.map(x=>x.name),axisLabel:{rotate:30,fontSize:10}},
+        yAxis:{type:'value'},
+        series:[{type:'bar',data:c.map(x=>x.elderlyCount),itemStyle:{color:'#409EFF'},barMaxWidth:30}],
+        grid:{left:50,right:20,top:50,bottom:60}
+      })
+
+      // 预警处理率对比
+      const bar2 = echarts.init(document.getElementById('bar-warn'))
+      bar2.setOption({
+        title:{text:'预警处理率对比 (%)',textStyle:{fontSize:14},left:'center'},
+        tooltip:{},
+        xAxis:{type:'category',data:c.map(x=>x.name),axisLabel:{rotate:30,fontSize:10}},
+        yAxis:{type:'value',min:0,max:100},
+        series:[{type:'bar',data:c.map(x=>x.warnRate),
+          itemStyle:{color:params=>params.value<60?'#ff4d4f':params.value<80?'#faad14':'#52c41a'},barMaxWidth:30}],
+        grid:{left:50,right:20,top:50,bottom:60}
+      })
+
+      // 随访完成率对比
+      const bar3 = echarts.init(document.getElementById('bar-followup'))
+      bar3.setOption({
+        title:{text:'随访完成率对比 (%)',textStyle:{fontSize:14},left:'center'},
+        tooltip:{},
+        xAxis:{type:'category',data:c.map(x=>x.name),axisLabel:{rotate:30,fontSize:10}},
+        yAxis:{type:'value',min:0,max:100},
+        series:[{type:'bar',data:c.map(x=>x.followupRate),itemStyle:{color:'#722ed1'},barMaxWidth:30}],
+        grid:{left:50,right:20,top:50,bottom:60}
+      })
+    }
+
+    onMounted(()=>{ nextTick(renderCharts) })
+    return {timeRange,selectedCommunity,exportVisible,exportSheets,timeLabel,tableHeaders,communities,refreshData,showExportDialog,doExport}
+  }
+})
+app.use(ElementPlus)
+app.mount('#app')
+</script>
+</body>
+</html>

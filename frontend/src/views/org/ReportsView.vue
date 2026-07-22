@@ -6,7 +6,7 @@
       <el-breadcrumb-item>报表统计</el-breadcrumb-item>
     </el-breadcrumb>
 
-    <h2 style="margin: 16px 0">{{ isComAdmin ? community + ' — 社区报表' : '报表统计' }}</h2>
+    <h2 style="margin: 16px 0">{{ isComAdmin ? community + ' — 社区报表' : '机构全局报表 — 各社区横向对比' }}</h2>
 
     <!-- Tab 切换 -->
     <el-tabs v-model="activeTab" @tab-change="onTabChange">
@@ -94,15 +94,14 @@
         <el-card shadow="hover" style="margin-bottom: 16px">
           <el-form :inline="true">
             <el-form-item v-if="isOrgAdmin" label="选择社区">
-              <el-select v-model="selectedCommunity" placeholder="请选择社区" @change="loadCommunityDetail">
+              <el-select v-model="selectedCommunity" placeholder="请选择社区" @change="loadCommunityDetail" filterable style="width: 200px">
                 <el-option v-for="c in overview.communities" :key="c" :label="c" :value="c" />
               </el-select>
-            </el-form-item>
-            <el-form-item v-else>
-              <span style="font-size:15px;font-weight:bold;color:#409eff">{{ selectedCommunity || community }}</span>
+              <span v-if="selectedCommunity" style="margin-left: 12px; font-size: 15px; font-weight: bold; color: #409eff;">
+                当前查看：{{ selectedCommunity }}
+              </span>
             </el-form-item>
             <el-form-item>
-              <el-button v-if="isOrgAdmin" type="primary" @click="loadCommunityDetail" :loading="detailLoading">查询</el-button>
               <el-button @click="exportData('community')">导出</el-button>
             </el-form-item>
           </el-form>
@@ -119,14 +118,14 @@
             </el-col>
             <el-col :span="6">
               <el-card shadow="hover" class="stat-card">
-                <div class="stat-value" style="color: #67C23A">{{ detail.elderly?.assigned || 0 }}</div>
-                <div class="stat-label">已签约</div>
+                <div class="stat-value" style="color: #67C23A">{{ (detail.doctorWorkload || []).length }}</div>
+                <div class="stat-label">签约医生</div>
               </el-card>
             </el-col>
             <el-col :span="6">
               <el-card shadow="hover" class="stat-card">
-                <div class="stat-value" style="color: #E6A23C">{{ detail.elderly?.unassigned || 0 }}</div>
-                <div class="stat-label">待分配</div>
+                <div class="stat-value" style="color: #E6A23C">{{ detail.devices?.online || 0 }}</div>
+                <div class="stat-label">在线设备</div>
               </el-card>
             </el-col>
             <el-col :span="6">

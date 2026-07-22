@@ -22,6 +22,10 @@ public interface SysUserService extends IService<SysUser> {
      */
     Page<Map<String, Object>> pageDoctors(String community, int pageNo, int pageSize, String keyword);
 
+    /** 医生档案（多角色只读）：支持 gender/status 筛选，community 可为 null（ORG 查全部） */
+    Page<Map<String, Object>> pageDoctorsArchive(String community, int pageNo, int pageSize,
+                                                  String keyword, Integer gender, Integer status);
+
     /**
      * 新增医生（自动创建账号，角色=DOCTOR）
      * @return 初始密码

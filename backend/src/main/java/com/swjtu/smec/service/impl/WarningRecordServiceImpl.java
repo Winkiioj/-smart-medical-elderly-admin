@@ -42,6 +42,13 @@ public class WarningRecordServiceImpl
     @org.springframework.context.annotation.Lazy
     private FollowupPlanService followupPlanService;
 
+    @Autowired
+    @org.springframework.context.annotation.Lazy
+    private com.swjtu.smec.service.SysUserService sysUserService;
+
+    @Autowired
+    private org.springframework.jdbc.core.JdbcTemplate jdbcTemplate;
+
     // ===== 供 B/A 跨域调用 =====
 
     @Override
@@ -85,10 +92,18 @@ public class WarningRecordServiceImpl
     // ===== UC-DOC-05 预警处理 =====
 
     @Override
-    public CommonResult pageByDoctor(int pageNo, int pageSize, Long doctorId,
+    public CommonResult pageByDoctor(int pageNo, int pageSize, Long doctorId, String community,
                                       Integer alertLevel, String alertType, Integer status,
                                       String startTime, String endTime) {
-        List<Long> elderlyIds = getElderlyIdsByDoctor(doctorId);
+        List<Long> elderlyIds;
+        if (community != null && !community.isEmpty()) {
+            // 社区管理员：按社区过滤，查看本社区所有老人预警
+            elderlyIds = jdbcTemplate.queryForList(
+                    "SELECT id FROM elderly WHERE community = ? AND is_deleted = 0",
+                    Long.class, community);
+        } else {
+            elderlyIds = getElderlyIdsByDoctor(doctorId);
+        }
         Page<WarningRecord> page = new Page<>(pageNo, pageSize);
         IPage<WarningRecord> result = this.baseMapper.selectPageByDoctor(
                 page, elderlyIds, alertLevel, alertType, status, startTime, endTime);
@@ -116,6 +131,11 @@ public class WarningRecordServiceImpl
             return CommonResult.error(404, "预警记录不存在");
         }
         Elderly elderly = elderlyService.getById(record.getElderlyId());
+        // 查询处理人姓名
+        if (record.getHandlerId() != null) {
+            com.swjtu.smec.entity.SysUser handler = sysUserService.getById(record.getHandlerId());
+            if (handler != null) record.setHandlerName(handler.getRealName());
+        }
         Map<String, Object> data = new LinkedHashMap<>();
         data.put("warning", record);
         data.put("elderly", elderly);

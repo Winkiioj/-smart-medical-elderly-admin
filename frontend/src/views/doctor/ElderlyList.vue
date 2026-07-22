@@ -11,7 +11,7 @@
         <el-form-item label="关键词">
           <el-input v-model="filters.keyword" placeholder="姓名 / 身份证号" clearable style="width:180px" @keyup.enter="search" />
         </el-form-item>
-        <el-form-item label="社区">
+        <el-form-item v-if="!isComAdmin" label="社区">
           <el-input v-model="filters.community" placeholder="社区名称" clearable style="width:140px" />
         </el-form-item>
         <el-form-item label="性别">
@@ -175,6 +175,8 @@ import { getStorage } from '@/utils/localStorage.js'
 
 const route = useRoute()
 const isDoctor = computed(() => getStorage('RoleCode') === 'DOCTOR')
+const isComAdmin = computed(() => getStorage('RoleCode') === 'COM_ADMIN')
+const myCommunity = computed(() => getStorage('Community') || '')
 
 // ===== 筛选 =====
 const filters = reactive({
@@ -188,11 +190,11 @@ const resetFilters = () => {
 }
 
 // ===== 表格与分页 =====
-const keyword = ref(''), community = ref(''), page = ref(1), size = ref(20), total = ref(0)
+const page = ref(1), size = ref(20), total = ref(0)
 const list = ref([]), loading = ref(false)
 const isNewFilter = computed(() => route.meta?.filter === 'new')
 const title = computed(() => isNewFilter.value ? '本月新增老人' : '老人档案管理')
-const elderlyTags = reactive({})  // { elderlyId: [{id,tagName,color}, ...] }
+const elderlyTags = reactive({})
 
 const dialogVisible = ref(false), isEdit = ref(false), formTitle = ref('')
 const form = reactive({ id: null, name: '', idCard: '', gender: 1, phone: '', community: '', address: '', height: null, birthDate: '', age: null, admissionDate: '', emergencyContact: '', emergencyPhone: '', medicalHistory: '', contacts: [] })
@@ -225,13 +227,11 @@ const search = async () => {
     const { data } = await getElderlyList(params)
     list.value = data.records
     total.value = data.total
-    // load tags for each elderly
     for (const e of data.records) {
       if (!elderlyTags[e.id]) {
         try {
           const res = await getTagsByElderly(e.id)
-          const tagIds = res.data || []
-          elderlyTags[e.id] = tagIds.map(tid => tagList.value.find(t => t.id === tid)).filter(Boolean)
+          elderlyTags[e.id] = (res.data || []).map(tid => tagList.value.find(t => t.id === tid)).filter(Boolean)
         } catch { elderlyTags[e.id] = [] }
       }
     }
@@ -280,10 +280,11 @@ const submitForm = async () => {
   dialogVisible.value = false; search()
 }
 
-const onSelectChange = () => {} // 预留批量操作
+const onSelectChange = () => {}
 
 // ===== 初始化 =====
 onMounted(async () => {
+  if (isComAdmin.value) filters.community = myCommunity.value
   try {
     const res = await getTagList()
     tagList.value = res.data || []
@@ -291,10 +292,7 @@ onMounted(async () => {
   search()
 })
 
-// 切换 /elderly ↔ /elderly-new 时自动重新查询
-watch(() => route.path, () => {
-  search()
-})
+watch(() => route.path, () => { search() })
 </script>
 
 <style scoped>

@@ -47,6 +47,13 @@ const routes = [
         component: () => import('@/views/org/CommunityManage.vue'),
         meta: { title: '社区管理', roles: [ORG] },
       },
+      // ===== 医生档案：只读查阅（ORG + COM + DOC） =====
+      {
+        path: 'doctor-archive',
+        name: 'DoctorArchive',
+        component: () => import('@/views/DoctorArchive.vue'),
+        meta: { title: '医生档案', roles: [ORG] },
+      },
       // ===== A 负责：社区管理员专属 =====
       {
         path: 'doctors',

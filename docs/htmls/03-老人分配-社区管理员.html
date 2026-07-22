@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>智慧医养管理系统 — 老人分配（社区管理员）</title>
+<link rel="stylesheet" href="https://unpkg.com/element-plus/dist/index.css">
+<script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+<script src="https://unpkg.com/element-plus"></script>
+<script src="https://unpkg.com/@element-plus/icons-vue"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'PingFang SC','Microsoft YaHei',sans-serif;background:#f0f2f5}
+.layout{display:flex;min-height:100vh}
+.sidebar{width:220px;background:#001529;color:#fff;flex-shrink:0}
+.sidebar .logo{height:60px;display:flex;align-items:center;padding:0 20px;font-size:16px;font-weight:600;border-bottom:1px solid rgba(255,255,255,.1);color:#fff}
+.sidebar .logo span{color:#409EFF;margin-right:6px}
+.sidebar .menu-item{padding:12px 24px;cursor:pointer;color:rgba(255,255,255,.65);font-size:14px;transition:.2s;display:flex;align-items:center;gap:8px}
+.sidebar .menu-item:hover,.sidebar .menu-item.active{color:#fff;background:#1890ff}
+.sidebar .menu-group{padding:8px 24px;font-size:12px;color:rgba(255,255,255,.35);margin-top:12px}
+.main{flex:1;display:flex;flex-direction:column}
+.header{height:56px;background:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 24px;box-shadow:0 1px 4px rgba(0,0,0,.08)}
+.content{padding:20px 24px;flex:1;overflow-y:auto}
+.toolbar{display:flex;gap:12px;margin-bottom:16px;align-items:center;flex-wrap:wrap}
+.toolbar .spacer{flex:1}
+.elderly-card{display:flex;align-items:center;gap:12px;padding:4px 0}
+</style>
+</head>
+<body>
+<div id="app">
+<div class="layout">
+  <div class="sidebar">
+    <div class="logo"><span>🏥</span> 智慧医养管理</div>
+    <div class="menu-group">社区管理</div>
+    <div class="menu-item"><el-icon><DataAnalysis /></el-icon> Dashboard</div>
+    <div class="menu-item"><el-icon><UserFilled /></el-icon> 医生管理</div>
+    <div class="menu-item active"><el-icon><Connection /></el-icon> 老人分配</div>
+    <div class="menu-item"><el-icon><Document /></el-icon> 报表统计</div>
+    <div class="menu-group">业务功能</div>
+    <div class="menu-item"><el-icon><User /></el-icon> 老人档案</div>
+    <div class="menu-item"><el-icon><Bell /></el-icon> 预警记录</div>
+    <div class="menu-item"><el-icon><Clock /></el-icon> 随访管理</div>
+  </div>
+  <div class="main">
+    <div class="header">
+      <div style="font-size:15px;color:#595959">
+        <el-breadcrumb separator="/">
+          <el-breadcrumb-item>首页</el-breadcrumb-item>
+          <el-breadcrumb-item>老人分配</el-breadcrumb-item>
+        </el-breadcrumb>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;font-size:14px">
+        <el-badge :value="4" :max="99"><el-icon :size="20"><Bell /></el-icon></el-badge>
+        <el-avatar :size="32" style="background:#52c41a">陈</el-avatar>
+        <span>陈院长（社区管理员 · 牛市口社区）</span>
+      </div>
+    </div>
+    <div class="content">
+
+      <!-- 三标签页切换 -->
+      <el-tabs v-model="activeTab" @tab-change="onTabChange">
+        <el-tab-pane label="待分配老人" name="pending">
+          <template #label>
+            <span>待分配老人 <el-badge :value="unassignedList.length" :max="99" style="margin-left:4px"/></span>
+          </template>
+        </el-tab-pane>
+        <el-tab-pane label="已分配老人" name="assigned"/>
+        <el-tab-pane label="医生负荷" name="workload"/>
+      </el-tabs>
+
+      <!-- Tab1: 待分配老人 -->
+      <div v-show="activeTab==='pending'">
+        <div class="toolbar">
+          <el-input v-model="pendingSearch" placeholder="搜索老人姓名" style="width:200px" clearable :prefix-icon="Search"/>
+          <span class="spacer"></span>
+          <el-button type="primary" :icon="Check" @click="batchAssign" :disabled="selectedPending.length===0">
+            批量分配 (已选 {{selectedPending.length}} 位)
+          </el-button>
+        </div>
+
+        <div style="background:#fff;border-radius:8px;padding:20px;box-shadow:0 1px 3px rgba(0,0,0,.06)">
+          <el-table :data="filteredUnassigned" stripe @selection-change="sel=>selectedPending=sel" ref="pendingTable" style="width:100%">
+            <el-table-column type="selection" width="50"/>
+            <el-table-column prop="name" label="姓名" width="90"/>
+            <el-table-column prop="gender" label="性别" width="60">
+              <template #default="s"><span :style="{color:s.row.gender==='男'?'#409EFF':'#ff69b4'}">{{s.row.gender}}</span></template>
+            </el-table-column>
+            <el-table-column prop="age" label="年龄" width="60"/>
+            <el-table-column prop="idCard" label="身份证号" width="170">
+              <template #default="s">{{s.row.idCard.substring(0,3)}}****{{s.row.idCard.substring(14)}}</template>
+            </el-table-column>
+            <el-table-column prop="address" label="住址" min-width="180"/>
+            <el-table-column prop="admissionDate" label="入档日期" width="110" sortable/>
+            <el-table-column label="操作" width="240" fixed="right">
+              <template #default="s">
+                <el-select v-model="s.row._assignedDoctor" placeholder="选择医生" size="small" style="width:140px" @change="(v)=>quickAssign(s.row,v)">
+                  <el-option v-for="d in doctorOptions" :key="d.name" :value="d.name"
+                    :label="d.name+' ('+d.elderlyCount+'人'+')'"
+                    :disabled="d.elderlyCount>=300"/>
+                </el-select>
+                <el-button size="small" type="primary" text style="margin-left:4px" @click="singleAssign(s.row)">分配</el-button>
+              </template>
+            </el-table-column>
+          </el-table>
+
+          <el-empty v-if="filteredUnassigned.length===0" description="暂无待分配老人" :image-size="80"/>
+        </div>
+      </div>
+
+      <!-- Tab2: 已分配老人 -->
+      <div v-show="activeTab==='assigned'">
+        <div class="toolbar">
+          <el-input v-model="assignedSearch" placeholder="搜索老人姓名" style="width:200px" clearable :prefix-icon="Search"/>
+          <el-select v-model="doctorFilter" placeholder="按签约医生筛选" style="width:180px" clearable>
+            <el-option v-for="d in doctorOptions" :key="d.name" :label="d.name+' ('+d.elderlyCount+'人)'" :value="d.name"/>
+          </el-select>
+          <span class="spacer"></span>
+        </div>
+
+        <div style="background:#fff;border-radius:8px;padding:20px;box-shadow:0 1px 3px rgba(0,0,0,.06)">
+          <el-table :data="filteredAssigned" stripe style="width:100%">
+            <el-table-column prop="name" label="姓名" width="90"/>
+            <el-table-column prop="gender" label="性别" width="60">
+              <template #default="s"><span :style="{color:s.row.gender==='男'?'#409EFF':'#ff69b4'}">{{s.row.gender}}</span></template>
+            </el-table-column>
+            <el-table-column prop="age" label="年龄" width="60"/>
+            <el-table-column prop="doctorName" label="签约医生" width="100">
+              <template #default="s"><el-tag size="small" type="success">{{s.row.doctorName}}</el-tag></template>
+            </el-table-column>
+            <el-table-column prop="admissionDate" label="入档日期" width="110" sortable/>
+            <el-table-column label="操作" width="160" fixed="right">
+              <template #default="s">
+                <el-button size="small" type="warning" text @click="openReassignDialog(s.row)">调整分配</el-button>
+                <el-button size="small" type="info" text @click="viewElderlyDetail(s.row)">详情</el-button>
+              </template>
+            </el-table-column>
+          </el-table>
+
+          <el-empty v-if="filteredAssigned.length===0" description="暂无已分配老人" :image-size="80"/>
+          <div style="margin-top:16px;text-align:right">
+            <el-pagination :current-page="1" :page-size="10" :total="filteredAssigned.length" layout="total,prev,pager,next" small/>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab3: 医生负荷 -->
+      <div v-show="activeTab==='workload'">
+        <div style="background:#fff;border-radius:8px;padding:20px;box-shadow:0 1px 3px rgba(0,0,0,.06)">
+          <el-table :data="doctorWorkload" stripe style="width:100%" :default-sort="{prop:'elderlyCount',order:'descending'}">
+            <el-table-column prop="name" label="医生姓名" width="100"/>
+            <el-table-column prop="status" label="状态" width="80">
+              <template #default="s">
+                <el-tag :type="s.row.status==='启用'?'success':'danger'" size="small">{{s.row.status}}</el-tag>
+              </template>
+            </el-table-column>
+            <el-table-column prop="elderlyCount" label="当前签约数" width="120" sortable>
+              <template #default="s">
+                <span :style="{color:s.row.elderlyCount>=300?'#ff4d4f':s.row.elderlyCount>=200?'#faad14':'#262626',fontWeight:'600'}">
+                  {{s.row.elderlyCount}} / 300
+                </span>
+              </template>
+            </el-table-column>
+            <el-table-column label="负荷条" min-width="200">
+              <template #default="s">
+                <el-progress :percentage="Math.min(s.row.elderlyCount/300*100,100)"
+                  :color="s.row.elderlyCount>=300?'#ff4d4f':s.row.elderlyCount>=200?'#faad14':'#52c41a'"
+                  :stroke-width="16">
+                  <span style="font-size:12px">{{s.row.elderlyCount>=300?'已满':s.row.elderlyCount>=200?'偏高':'正常'}}</span>
+                </el-progress>
+              </template>
+            </el-table-column>
+            <el-table-column prop="newThisMonth" label="本月新增" width="90" sortable/>
+            <el-table-column prop="warnRate" label="预警处理率" width="110" sortable>
+              <template #default="s"><el-tag :type="s.row.warnRate>=80?'success':s.row.warnRate>=60?'warning':'danger'" size="small">{{s.row.warnRate}}%</el-tag></template>
+            </el-table-column>
+            <el-table-column prop="followupRate" label="随访完成率" width="110" sortable/>
+            <el-table-column label="建议" width="200">
+              <template #default="s">
+                <span v-if="s.row.elderlyCount>=300" style="color:#ff4d4f">⚠ 已达上限，不可接收新老人</span>
+                <span v-else-if="s.row.elderlyCount>=250" style="color:#faad14">⚡ 负荷偏高，建议减少分配</span>
+                <span v-else-if="s.row.elderlyCount<150" style="color:#52c41a">✅ 有富余精力，可多分配</span>
+                <span v-else style="color:#8c8c8c">— 正常</span>
+              </template>
+            </el-table-column>
+          </el-table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 批量分配弹窗 -->
+<el-dialog v-model="batchVisible" title="批量分配签约医生" width="450px">
+  <div style="margin-bottom:16px">
+    <p style="color:#262626;margin-bottom:12px">为以下 <strong>{{selectedPending.length}}</strong> 位待分配老人选择签约医生：</p>
+    <div style="max-height:120px;overflow-y:auto;padding:8px;background:#fafafa;border-radius:4px">
+      <el-tag v-for="e in selectedPending" :key="e.name" size="small" style="margin:3px">{{e.name}} ({{e.age}}岁)</el-tag>
+    </div>
+  </div>
+  <el-form label-width="90px">
+    <el-form-item label="签约医生">
+      <el-select v-model="batchDoctor" placeholder="请选择医生" style="width:100%">
+        <el-option v-for="d in availableDoctors" :key="d.name"
+          :value="d.name"
+          :label="d.name+' — 当前签约 '+d.elderlyCount+' 人 ('+d.advice+')'"
+          :disabled="d.elderlyCount>=300">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <span>{{d.name}}</span>
+            <span :style="{fontSize:'12px',color:d.elderlyCount>=250?'#faad14':'#8c8c8c'}">
+              签约 {{d.elderlyCount}} 人
+              <el-tag v-if="d.elderlyCount>=300" type="danger" size="small">已满</el-tag>
+              <el-tag v-else-if="d.elderlyCount>=200" type="warning" size="small">偏高</el-tag>
+            </span>
+          </div>
+        </el-option>
+      </el-select>
+    </el-form-item>
+  </el-form>
+  <template #footer>
+    <el-button @click="batchVisible=false">取消</el-button>
+    <el-button type="primary" @click="confirmBatch" :disabled="!batchDoctor">确认分配</el-button>
+  </template>
+</el-dialog>
+
+<!-- 调整分配弹窗 -->
+<el-dialog v-model="reassignVisible" title="调整签约医生" width="450px">
+  <div style="margin-bottom:16px">
+    <p style="color:#262626">老人：<strong>{{reassignElderly?.name}}</strong></p>
+    <p style="color:#8c8c8c;font-size:13px;margin-top:4px">
+      当前签约医生：<el-tag type="success" size="small">{{reassignElderly?.doctorName}}</el-tag>
+    </p>
+    <p v-if="reassignElderly?._hasPendingWarn" style="color:#faad14;font-size:13px;margin-top:8px">
+      ⚠ 该老人当前有待处理预警，建议处理完成后再调整
+    </p>
+  </div>
+  <el-form label-width="90px">
+    <el-form-item label="新签约医生">
+      <el-select v-model="newDoctor" placeholder="请选择新医生" style="width:100%">
+        <el-option v-for="d in availableDoctors" :key="d.name"
+          :value="d.name"
+          :label="d.name+' (当前签约 '+d.elderlyCount+' 人)'"
+          :disabled="d.name===reassignElderly?.doctorName || d.elderlyCount>=300"/>
+      </el-select>
+    </el-form-item>
+  </el-form>
+  <template #footer>
+    <el-button @click="reassignVisible=false">取消</el-button>
+    <el-button type="primary" @click="confirmReassign" :disabled="!newDoctor">确认调整</el-button>
+  </template>
+</el-dialog>
+</div>
+
+<script>
+const { createApp, ref, computed, reactive } = Vue
+const app = createApp({
+  setup(){
+    const activeTab = ref('pending')
+    const pendingSearch = ref('')
+    const assignedSearch = ref('')
+    const doctorFilter = ref('')
+    const selectedPending = ref([])
+    const batchVisible = ref(false)
+    const batchDoctor = ref('')
+    const reassignVisible = ref(false)
+    const reassignElderly = ref(null)
+    const newDoctor = ref('')
+
+    // 医生数据
+    const doctors = ref([
+      {name:'李医生',elderlyCount:238,newThisMonth:8,warnRate:85.2,followupRate:89.1,status:'启用'},
+      {name:'王医生',elderlyCount:196,newThisMonth:5,warnRate:78.5,followupRate:82.3,status:'启用'},
+      {name:'张医生',elderlyCount:215,newThisMonth:6,warnRate:91.3,followupRate:93.7,status:'启用'},
+      {name:'赵医生',elderlyCount:178,newThisMonth:4,warnRate:76.9,followupRate:80.5,status:'启用'},
+      {name:'刘医生',elderlyCount:310,newThisMonth:3,warnRate:82.1,followupRate:85.8,status:'启用'},
+      {name:'周医生',elderlyCount:155,newThisMonth:7,warnRate:94.2,followupRate:96.0,status:'启用'},
+      {name:'吴医生',elderlyCount:240,newThisMonth:2,warnRate:69.8,followupRate:73.2,status:'启用'},
+      {name:'孙医生',elderlyCount:0,newThisMonth:0,warnRate:0,followupRate:0,status:'禁用'},
+    ])
+
+    const doctorOptions = computed(()=>
+      doctors.value.filter(d=>d.status==='启用').map(d=>{
+        let advice = d.elderlyCount>=300?'已满':d.elderlyCount>=250?'负荷偏高':d.elderlyCount<150?'富余精力':'正常'
+        return {...d,advice}
+      })
+    )
+
+    const availableDoctors = computed(()=>doctorOptions.value)
+
+    const doctorWorkload = computed(()=>
+      doctors.value.map(d=>({...d}))
+    )
+
+    // 待分配老人（无医生）
+    const unassignedList = ref([
+      {name:'赵建国',gender:'男',age:75,idCard:'51010619500512xxxx',address:'锦江区牛市口路38号',admissionDate:'2026-07-14',_assignedDoctor:''},
+      {name:'孙桂芳',gender:'女',age:82,idCard:'51010619440208xxxx',address:'锦江区东大街15号',admissionDate:'2026-07-13',_assignedDoctor:''},
+      {name:'周德才',gender:'男',age:68,idCard:'51010619581123xxxx',address:'锦江区海椒市街7号',admissionDate:'2026-07-12',_assignedDoctor:''},
+      {name:'吴秀英',gender:'女',age:79,idCard:'51010619470615xxxx',address:'锦江区宏济新路22号',admissionDate:'2026-07-10',_assignedDoctor:''},
+      {name:'郑国栋',gender:'男',age:71,idCard:'51010619550330xxxx',address:'锦江区莲花东路9号',admissionDate:'2026-07-08',_assignedDoctor:''},
+      {name:'钱美兰',gender:'女',age:85,idCard:'51010619410518xxxx',address:'锦江区水碾河路12号',admissionDate:'2026-07-05',_assignedDoctor:''},
+    ])
+
+    // 已分配老人
+    const assignedList = ref([
+      {name:'张秀英',gender:'女',age:82,doctorName:'李医生',admissionDate:'2026-07-14',_hasPendingWarn:true},
+      {name:'李明德',gender:'男',age:76,doctorName:'李医生',admissionDate:'2026-07-13',_hasPendingWarn:false},
+      {name:'陈桂兰',gender:'女',age:79,doctorName:'王医生',admissionDate:'2026-07-12',_hasPendingWarn:false},
+      {name:'张德福',gender:'男',age:83,doctorName:'刘医生',admissionDate:'2026-07-11',_hasPendingWarn:false},
+      {name:'赵玉珍',gender:'女',age:74,doctorName:'赵医生',admissionDate:'2026-07-10',_hasPendingWarn:false},
+      {name:'周建国',gender:'男',age:69,doctorName:'周医生',admissionDate:'2026-07-09',_hasPendingWarn:false},
+      {name:'吴淑华',gender:'女',age:81,doctorName:'张医生',admissionDate:'2026-07-08',_hasPendingWarn:false},
+      {name:'郑明德',gender:'男',age:77,doctorName:'吴医生',admissionDate:'2026-07-05',_hasPendingWarn:true},
+    ])
+
+    const filteredUnassigned = computed(()=>{
+      if(!pendingSearch.value) return unassignedList.value
+      return unassignedList.value.filter(e=>e.name.includes(pendingSearch.value))
+    })
+
+    const filteredAssigned = computed(()=>{
+      let list = assignedList.value
+      if(assignedSearch.value) list = list.filter(e=>e.name.includes(assignedSearch.value))
+      if(doctorFilter.value) list = list.filter(e=>e.doctorName===doctorFilter.value)
+      return list
+    })
+
+    function quickAssign(elderly,doctorName){
+      elderly._assignedDoctor = doctorName
+    }
+
+    function singleAssign(elderly){
+      if(!elderly._assignedDoctor){ ElementPlus.ElMessage.warning('请先选择签约医生'); return }
+      const doc = doctors.value.find(d=>d.name===elderly._assignedDoctor)
+      if(doc && doc.elderlyCount>=300){ ElementPlus.ElMessage.error('该医生签约数已达上限，无法分配'); return }
+      doAssign([elderly],elderly._assignedDoctor)
+    }
+
+    function batchAssign(){
+      if(selectedPending.value.length===0){ ElementPlus.ElMessage.warning('请先勾选待分配老人'); return }
+      batchDoctor.value = ''
+      batchVisible.value = true
+    }
+
+    function confirmBatch(){
+      doAssign(selectedPending.value,batchDoctor.value)
+      batchVisible.value = false
+      selectedPending.value = []
+    }
+
+    function doAssign(elderlies,doctorName){
+      const doc = doctors.value.find(d=>d.name===doctorName)
+      elderlies.forEach(e=>{
+        assignedList.value.unshift({name:e.name,gender:e.gender,age:e.age,doctorName,admissionDate:e.admissionDate,_hasPendingWarn:false})
+        const idx = unassignedList.value.findIndex(u=>u.name===e.name)
+        if(idx>=0) unassignedList.value.splice(idx,1)
+      })
+      if(doc) doc.elderlyCount += elderlies.length
+      ElementPlus.ElMessage.success(`已为 ${elderlies.length} 位老人分配签约医生：${doctorName}`)
+    }
+
+    function openReassignDialog(elderly){
+      reassignElderly.value = elderly
+      newDoctor.value = ''
+      reassignVisible.value = true
+    }
+
+    function confirmReassign(){
+      const oldDoc = doctors.value.find(d=>d.name===reassignElderly.value.doctorName)
+      const newDoc = doctors.value.find(d=>d.name===newDoctor.value)
+      if(oldDoc) oldDoc.elderlyCount--
+      if(newDoc) newDoc.elderlyCount++
+      reassignElderly.value.doctorName = newDoctor.value
+      reassignVisible.value = false
+      ElementPlus.ElMessage.success(`已调整：${reassignElderly.value.name} 的签约医生从 ${oldDoc?.name} 变更为 ${newDoc?.name}`)
+    }
+
+    function viewElderlyDetail(elderly){
+      ElementPlus.ElMessage.info('跳转到老人详情页（功能由 B 负责开发）')
+    }
+
+    function onTabChange(tab){}
+
+    return {activeTab,pendingSearch,assignedSearch,doctorFilter,selectedPending,batchVisible,batchDoctor,reassignVisible,reassignElderly,newDoctor,doctors,doctorOptions,availableDoctors,doctorWorkload,unassignedList,assignedList,filteredUnassigned,filteredAssigned,quickAssign,singleAssign,batchAssign,confirmBatch,openReassignDialog,confirmReassign,viewElderlyDetail,onTabChange}
+  }
+})
+app.use(ElementPlus)
+app.mount('#app')
+</script>
+</body>
+</html>

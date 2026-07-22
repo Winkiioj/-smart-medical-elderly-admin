@@ -79,11 +79,16 @@
         <h2>欢迎登录</h2>
         <p class="form-subtitle">请输入您的账号信息</p>
 
-        <el-input
+        <el-autocomplete
           v-model="username"
+          :fetch-suggestions="queryRecentAccounts"
+          :trigger-on-focus="true"
           placeholder="用户名"
           size="large"
           :prefix-icon="User"
+          clearable
+          :debounce="0"
+          popper-class="recent-login-popper"
         />
         <el-input
           v-model="password"
@@ -141,6 +146,37 @@ const username = ref('')
 const password = ref('')
 const loading = ref(false)
 
+// ===== 最近登录账号 =====
+const RECENT_KEY = 'recentAccounts'
+const MAX_RECENT = 4
+
+const loadRecentAccounts = () => {
+  try {
+    const raw = localStorage.getItem(RECENT_KEY)
+    return raw ? JSON.parse(raw) : []
+  } catch { return [] }
+}
+const recentAccounts = ref(loadRecentAccounts())
+
+const saveRecentAccount = (name) => {
+  let list = loadRecentAccounts()
+  // 去重：删掉旧出现的同名
+  list = list.filter(a => a !== name)
+  // 插入到最前面
+  list.unshift(name)
+  // 截断到最多 4 个
+  if (list.length > MAX_RECENT) list = list.slice(0, MAX_RECENT)
+  recentAccounts.value = list
+  localStorage.setItem(RECENT_KEY, JSON.stringify(list))
+}
+
+const queryRecentAccounts = (queryString, cb) => {
+  const results = recentAccounts.value
+    .filter(a => a.toLowerCase().includes(queryString.toLowerCase()))
+    .map(a => ({ value: a }))
+  cb(results)
+}
+
 // 验证码
 const captchaKey = ref('')
 const captchaCode = ref('')
@@ -188,6 +224,8 @@ const handleLogin = async () => {
     setStorage('RoleName', data.roleName || '')
     setStorage('RealName', data.realName || '')
     setStorage('Community', data.community || '')
+    // 登录成功：保存到最近登录列表
+    saveRecentAccount(username.value)
     ElMessage.success(`登录成功！欢迎 ${data.roleName || ''}`)
     const home = ROLE_HOME[data.roleCode] || '/dashboard'
     router.push(home)
@@ -438,5 +476,18 @@ const handleLogin = async () => {
 }
 .captcha-img:hover {
   border-color: #409eff;
+}
+
+/* 最近登录下拉 */
+:deep(.recent-login-popper) .el-autocomplete-suggestion__list {
+  padding: 0;
+}
+:deep(.recent-login-popper) .el-autocomplete-suggestion li {
+  padding: 10px 16px;
+  font-size: 14px;
+  cursor: pointer;
+}
+:deep(.recent-login-popper) .el-autocomplete-suggestion li:hover {
+  background: #ecf5ff;
 }
 </style>

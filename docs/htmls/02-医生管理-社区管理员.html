@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>智慧医养管理系统 — 医生管理（社区管理员）</title>
+<link rel="stylesheet" href="https://unpkg.com/element-plus/dist/index.css">
+<script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+<script src="https://unpkg.com/element-plus"></script>
+<script src="https://unpkg.com/@element-plus/icons-vue"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'PingFang SC','Microsoft YaHei',sans-serif;background:#f0f2f5}
+.layout{display:flex;min-height:100vh}
+.sidebar{width:220px;background:#001529;color:#fff;flex-shrink:0}
+.sidebar .logo{height:60px;display:flex;align-items:center;padding:0 20px;font-size:16px;font-weight:600;border-bottom:1px solid rgba(255,255,255,.1);color:#fff}
+.sidebar .logo span{color:#409EFF;margin-right:6px}
+.sidebar .menu-item{padding:12px 24px;cursor:pointer;color:rgba(255,255,255,.65);font-size:14px;transition:.2s;display:flex;align-items:center;gap:8px}
+.sidebar .menu-item:hover,.sidebar .menu-item.active{color:#fff;background:#1890ff}
+.sidebar .menu-group{padding:8px 24px;font-size:12px;color:rgba(255,255,255,.35);margin-top:12px}
+.main{flex:1;display:flex;flex-direction:column}
+.header{height:56px;background:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 24px;box-shadow:0 1px 4px rgba(0,0,0,.08)}
+.content{padding:20px 24px;flex:1;overflow-y:auto}
+.toolbar{display:flex;gap:12px;margin-bottom:16px;align-items:center;flex-wrap:wrap}
+.toolbar .spacer{flex:1}
+</style>
+</head>
+<body>
+<div id="app">
+<div class="layout">
+  <div class="sidebar">
+    <div class="logo"><span>🏥</span> 智慧医养管理</div>
+    <div class="menu-group">社区管理</div>
+    <div class="menu-item"><el-icon><DataAnalysis /></el-icon> Dashboard</div>
+    <div class="menu-item active"><el-icon><UserFilled /></el-icon> 医生管理</div>
+    <div class="menu-item"><el-icon><Connection /></el-icon> 老人分配</div>
+    <div class="menu-item"><el-icon><Document /></el-icon> 报表统计</div>
+    <div class="menu-group">业务功能</div>
+    <div class="menu-item"><el-icon><User /></el-icon> 老人档案</div>
+    <div class="menu-item"><el-icon><Bell /></el-icon> 预警记录</div>
+    <div class="menu-item"><el-icon><Clock /></el-icon> 随访管理</div>
+  </div>
+  <div class="main">
+    <div class="header">
+      <div style="font-size:15px;color:#595959">
+        <el-breadcrumb separator="/">
+          <el-breadcrumb-item>首页</el-breadcrumb-item>
+          <el-breadcrumb-item>医生管理</el-breadcrumb-item>
+        </el-breadcrumb>
+      </div>
+      <div class="user" style="display:flex;align-items:center;gap:8px;font-size:14px">
+        <el-badge :value="2" :max="99"><el-icon :size="20"><Bell /></el-icon></el-badge>
+        <el-avatar :size="32" style="background:#52c41a">陈</el-avatar>
+        <span>陈院长（社区管理员 · 牛市口社区）</span>
+      </div>
+    </div>
+    <div class="content">
+
+      <!-- 本社区医生统计卡片 -->
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:20px">
+        <div style="background:#fff;border-radius:8px;padding:16px;box-shadow:0 1px 3px rgba(0,0,0,.06)">
+          <div style="font-size:13px;color:#8c8c8c">本社区医生数</div>
+          <div style="font-size:28px;font-weight:700;color:#262626;margin-top:4px">8<span style="font-size:14px;color:#52c41a;margin-left:8px">启用 7 / 禁用 1</span></div>
+        </div>
+        <div style="background:#fff;border-radius:8px;padding:16px;box-shadow:0 1px 3px rgba(0,0,0,.06)">
+          <div style="font-size:13px;color:#8c8c8c">签约老人总数</div>
+          <div style="font-size:28px;font-weight:700;color:#262626;margin-top:4px">1,532</div>
+        </div>
+        <div style="background:#fff;border-radius:8px;padding:16px;box-shadow:0 1px 3px rgba(0,0,0,.06)">
+          <div style="font-size:13px;color:#8c8c8c">人均签约老人</div>
+          <div style="font-size:28px;font-weight:700;color:#262626;margin-top:4px">191<span style="font-size:14px;color:#8c8c8c;margin-left:4px">人/医生</span></div>
+        </div>
+        <div style="background:#fff;border-radius:8px;padding:16px;box-shadow:0 1px 3px rgba(0,0,0,.06)">
+          <div style="font-size:13px;color:#8c8c8c">本月新增医生</div>
+          <div style="font-size:28px;font-weight:700;color:#52c41a;margin-top:4px">+3</div>
+        </div>
+      </div>
+
+      <!-- 工具栏 -->
+      <div class="toolbar">
+        <el-input v-model="search" placeholder="搜索姓名 / 手机号" style="width:220px" clearable :prefix-icon="Search"/>
+        <el-select v-model="statusFilter" placeholder="账号状态" style="width:140px" clearable>
+          <el-option label="全部" value=""/>
+          <el-option label="启用" value="1"/>
+          <el-option label="禁用" value="0"/>
+        </el-select>
+        <span class="spacer"></span>
+        <el-button type="primary" :icon="Plus" @click="openAddDialog">新增医生</el-button>
+      </div>
+
+      <!-- 医生列表 -->
+      <div style="background:#fff;border-radius:8px;padding:20px;box-shadow:0 1px 3px rgba(0,0,0,.06)">
+        <el-table :data="filteredDoctors" stripe style="width:100%" :default-sort="{prop:'enrollmentDate',order:'descending'}">
+          <el-table-column prop="name" label="姓名" width="100" />
+          <el-table-column prop="phone" label="手机号" width="130" />
+          <el-table-column prop="gender" label="性别" width="70">
+            <template #default="s"><span :style="{color:s.row.gender==='男'?'#409EFF':'#ff69b4'}">{{s.row.gender}}</span></template>
+          </el-table-column>
+          <el-table-column prop="elderlyCount" label="签约老人数" width="110" sortable>
+            <template #default="s">
+              <span :style="{color:s.row.elderlyCount>=300?'#ff4d4f':s.row.elderlyCount>=200?'#faad14':'#262626',fontWeight:s.row.elderlyCount>=300?'700':'400'}">
+                {{s.row.elderlyCount}} 人
+              </span>
+              <el-tag v-if="s.row.elderlyCount>=300" type="danger" size="small" style="margin-left:4px">满</el-tag>
+              <el-tag v-else-if="s.row.elderlyCount>=200" type="warning" size="small" style="margin-left:4px">偏高</el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column prop="warnRate" label="预警处理率" width="110" sortable>
+            <template #default="s">
+              <el-tag :type="s.row.warnRate>=80?'success':s.row.warnRate>=60?'warning':'danger'" size="small">{{s.row.warnRate}}%</el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column prop="followupRate" label="随访完成率" width="110" sortable>
+            <template #default="s">{{s.row.followupRate}}%</template>
+          </el-table-column>
+          <el-table-column prop="enrollmentDate" label="入职日期" width="110" sortable />
+          <el-table-column prop="status" label="账号状态" width="90">
+            <template #default="s">
+              <el-switch :model-value="s.row.status===1" @change="(val)=>toggleStatus(s.row,val)"
+                :loading="s.row._toggling" active-text="启用" inactive-text="禁用"/>
+            </template>
+          </el-table-column>
+          <el-table-column label="操作" width="130" fixed="right">
+            <template #default="s">
+              <el-button size="small" @click="openEditDialog(s.row)">编辑</el-button>
+              <el-button size="small" type="danger" text @click="confirmToggle(s.row)">{{s.row.status===1?'禁用':'启用'}}</el-button>
+            </template>
+          </el-table-column>
+        </el-table>
+        <div style="margin-top:16px;text-align:right">
+          <el-pagination :current-page="1" :page-size="10" :total="filteredDoctors.length" layout="total,prev,pager,next" small/>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- 新增医生弹窗 -->
+<el-dialog v-model="addVisible" title="新增医生" width="520px" :close-on-click-modal="false">
+  <el-form :model="form" label-width="90px" :rules="rules" ref="formRef">
+    <el-form-item label="姓名" prop="name"><el-input v-model="form.name" placeholder="请输入医生真实姓名"/></el-form-item>
+    <el-form-item label="手机号" prop="phone">
+      <el-input v-model="form.phone" placeholder="11位手机号，将作为登录用户名"/>
+      <div style="font-size:12px;color:#8c8c8c;margin-top:4px">手机号将自动作为系统登录用户名，初始密码随机生成</div>
+    </el-form-item>
+    <el-form-item label="性别" prop="gender">
+      <el-radio-group v-model="form.gender"><el-radio label="男">男</el-radio><el-radio label="女">女</el-radio></el-radio-group>
+    </el-form-item>
+    <el-form-item label="入职日期" prop="enrollmentDate"><el-date-picker v-model="form.enrollmentDate" type="date" placeholder="选择日期" style="width:100%"/></el-form-item>
+    <el-form-item label="邮箱"><el-input v-model="form.email" placeholder="选填"/></el-form-item>
+    <el-form-item label="备注"><el-input v-model="form.remark" type="textarea" :rows="2" placeholder="选填"/></el-form-item>
+  </el-form>
+
+  <!-- 创建成功后的账号信息 -->
+  <el-alert v-if="createdAccount" type="success" :closable="false" style="margin-top:12px" show-icon>
+    <template #title>
+      账号已创建！请将以下信息告知医生：
+    </template>
+    <div style="margin-top:8px;font-size:14px">
+      用户名：<el-tag type="success" style="cursor:pointer" @click="copyText(createdAccount.username)">{{createdAccount.username}}</el-tag>
+      &nbsp;&nbsp;
+      初始密码：<el-tag type="warning" style="cursor:pointer" @click="copyText(createdAccount.password)">{{createdAccount.password}}</el-tag>
+    </div>
+    <div style="font-size:12px;color:#8c8c8c;margin-top:4px">点击标签可复制，首次登录将强制修改密码</div>
+  </el-alert>
+
+  <template #footer>
+    <el-button @click="addVisible=false">取消</el-button>
+    <el-button type="primary" @click="submitAdd" :loading="submitting">
+      {{createdAccount?'关闭':'确认创建'}}
+    </el-button>
+  </template>
+</el-dialog>
+
+<!-- 编辑医生弹窗 -->
+<el-dialog v-model="editVisible" title="编辑医生信息" width="480px">
+  <el-form :model="editForm" label-width="90px">
+    <el-form-item label="姓名"><el-input v-model="editForm.name"/></el-form-item>
+    <el-form-item label="手机号">
+      <el-input v-model="editForm.phone" disabled/>
+      <div style="font-size:12px;color:#8c8c8c;margin-top:4px">手机号不可修改，如需变更请联系机构管理员</div>
+    </el-form-item>
+    <el-form-item label="邮箱"><el-input v-model="editForm.email"/></el-form-item>
+    <el-form-item label="备注"><el-input v-model="editForm.remark" type="textarea" :rows="2"/></el-form-item>
+  </el-form>
+  <template #footer>
+    <el-button @click="editVisible=false">取消</el-button>
+    <el-button type="primary" @click="saveEdit">保存</el-button>
+  </template>
+</el-dialog>
+</div>
+
+<script>
+const { createApp, ref, computed, reactive } = Vue
+const app = createApp({
+  setup(){
+    const search = ref('')
+    const statusFilter = ref('')
+    const addVisible = ref(false)
+    const editVisible = ref(false)
+    const submitting = ref(false)
+    const createdAccount = ref(null)
+    const formRef = ref(null)
+
+    const form = reactive({name:'',phone:'',gender:'男',enrollmentDate:'',email:'',remark:''})
+    const editForm = reactive({name:'',phone:'',email:'',remark:''})
+
+    const rules = {
+      name:[{required:true,message:'请输入姓名',trigger:'blur'}],
+      phone:[
+        {required:true,message:'请输入手机号',trigger:'blur'},
+        {pattern:/^1[3-9]\d{9}$/,message:'请输入正确的手机号码',trigger:'blur'}
+      ],
+      gender:[{required:true,message:'请选择性别',trigger:'change'}],
+      enrollmentDate:[{required:true,message:'请选择入职日期',trigger:'change'}]
+    }
+
+    // 模拟数据
+    const doctors = ref([
+      {name:'李医生',phone:'13980001111',gender:'男',elderlyCount:238,warnRate:85.2,followupRate:89.1,enrollmentDate:'2024-03-15',status:1,_toggling:false},
+      {name:'王医生',phone:'13980002222',gender:'男',elderlyCount:196,warnRate:78.5,followupRate:82.3,enrollmentDate:'2024-06-20',status:1,_toggling:false},
+      {name:'张医生',phone:'13980003333',gender:'女',elderlyCount:215,warnRate:91.3,followupRate:93.7,enrollmentDate:'2024-09-01',status:1,_toggling:false},
+      {name:'赵医生',phone:'13980004444',gender:'女',elderlyCount:178,warnRate:76.9,followupRate:80.5,enrollmentDate:'2025-01-10',status:1,_toggling:false},
+      {name:'刘医生',phone:'13980005555',gender:'男',elderlyCount:310,warnRate:82.1,followupRate:85.8,enrollmentDate:'2025-03-05',status:1,_toggling:false},
+      {name:'周医生',phone:'13980006666',gender:'女',elderlyCount:155,warnRate:94.2,followupRate:96.0,enrollmentDate:'2025-06-18',status:1,_toggling:false},
+      {name:'吴医生',phone:'13980007777',gender:'男',elderlyCount:240,warnRate:69.8,followupRate:73.2,enrollmentDate:'2025-08-22',status:1,_toggling:false},
+      {name:'孙医生',phone:'13980008888',gender:'女',elderlyCount:0,warnRate:0,followupRate:0,enrollmentDate:'2026-01-15',status:0,_toggling:false},
+    ])
+
+    const filteredDoctors = computed(()=>{
+      let d = doctors.value
+      if(search.value) d = d.filter(x=>x.name.includes(search.value)||x.phone.includes(search.value))
+      if(statusFilter.value!=='') d = d.filter(x=>x.status===parseInt(statusFilter.value))
+      return d
+    })
+
+    function openAddDialog(){
+      Object.assign(form,{name:'',phone:'',gender:'男',enrollmentDate:'',email:'',remark:''})
+      createdAccount.value = null
+      addVisible.value = true
+    }
+
+    function submitAdd(){
+      if(createdAccount.value){ addVisible.value=false; return }
+      // 模拟手机号唯一性校验
+      const exists = doctors.value.some(d=>d.phone===form.phone)
+      if(exists){ ElementPlus.ElMessage.error('该手机号已存在，请核实后重试'); return }
+      submitting.value = true
+      setTimeout(()=>{
+        doctors.value.push({
+          name:form.name, phone:form.phone, gender:form.gender,
+          elderlyCount:0, warnRate:0, followupRate:0,
+          enrollmentDate:form.enrollmentDate||'2026-07-15',
+          status:1, _toggling:false
+        })
+        createdAccount.value = {username:form.phone,password:'Abc'+(1000+Math.floor(Math.random()*9000))}
+        submitting.value = false
+        ElementPlus.ElMessage.success('医生账号创建成功！')
+      },800)
+    }
+
+    function openEditDialog(row){
+      Object.assign(editForm,{name:row.name,phone:row.phone,email:'',remark:''})
+      editVisible.value = true
+    }
+    function saveEdit(){
+      const doc = doctors.value.find(d=>d.phone===editForm.phone)
+      if(doc) doc.name = editForm.name
+      editVisible.value = false
+      ElementPlus.ElMessage.success('保存成功')
+    }
+
+    function confirmToggle(row){
+      if(row.status===1){
+        // 禁用确认
+        ElementPlus.ElMessageBox.confirm(
+          `确认禁用${row.name}的账号？禁用后：\n· 该医生将无法登录系统\n· 其签约的 ${row.elderlyCount} 位老人需重新分配\n· ${row.elderlyCount>0?'待处理预警将自动关闭':''}`,
+          '禁用医生账号',{confirmButtonText:'确认禁用',type:'warning',dangerouslyUseHTMLString:false}
+        ).then(()=>{ toggleStatus(row,false) }).catch(()=>{})
+      } else {
+        toggleStatus(row,true)
+      }
+    }
+
+    function toggleStatus(row,val){
+      row._toggling = true
+      setTimeout(()=>{
+        row.status = val?1:0
+        row._toggling = false
+        ElementPlus.ElMessage.success(val?'账号已启用':'账号已禁用，签约老人已回待分配列表')
+      },500)
+    }
+
+    function copyText(text){
+      navigator.clipboard.writeText(text).then(()=>{
+        ElementPlus.ElMessage.success('已复制：'+text)
+      }).catch(()=>{
+        ElementPlus.ElMessage.info('请手动复制：'+text)
+      })
+    }
+
+    return {search,statusFilter,addVisible,editVisible,submitting,createdAccount,formRef,form,rules,editForm,doctors,filteredDoctors,openAddDialog,submitAdd,openEditDialog,saveEdit,confirmToggle,toggleStatus,copyText}
+  }
+})
+app.use(ElementPlus)
+app.mount('#app')
+</script>
+</body>
+</html>

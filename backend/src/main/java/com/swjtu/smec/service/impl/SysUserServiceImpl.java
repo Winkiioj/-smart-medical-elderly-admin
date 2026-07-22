@@ -111,6 +111,62 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser>
     // ========== 医生管理 ==========
 
     @Override
+    public Page<Map<String, Object>> pageDoctorsArchive(String community, int pageNo, int pageSize,
+                                                         String keyword, Integer gender, Integer status) {
+        StringBuilder sql = new StringBuilder();
+        sql.append("SELECT u.id, u.real_name, u.phone, u.gender, u.email, u.status, u.community, ");
+        sql.append("  u.create_time, ");
+        sql.append("  (SELECT COUNT(*) FROM elderly e WHERE e.doctor_id = u.id AND e.is_deleted = 0) AS signing_count ");
+        sql.append("FROM sys_user u ");
+        sql.append("INNER JOIN sys_user_role ur ON u.id = ur.user_id AND ur.role_id = ").append(DOCTOR_ROLE_ID).append(" ");
+        sql.append("WHERE u.is_deleted = 0 ");
+
+        List<Object> params = new ArrayList<>();
+
+        if (community != null && !community.isEmpty()) {
+            sql.append("AND u.community = ? ");
+            params.add(community);
+        }
+        if (keyword != null && !keyword.isEmpty()) {
+            sql.append("AND (u.real_name LIKE ? OR u.phone LIKE ?) ");
+            params.add("%" + keyword + "%");
+            params.add("%" + keyword + "%");
+        }
+        if (gender != null) {
+            sql.append("AND u.gender = ? ");
+            params.add(gender);
+        }
+        if (status != null) {
+            sql.append("AND u.status = ? ");
+            params.add(status);
+        }
+
+        sql.append("ORDER BY u.create_time DESC ");
+        sql.append("LIMIT ? OFFSET ?");
+        params.add(pageSize);
+        params.add((pageNo - 1) * pageSize);
+
+        List<Map<String, Object>> records = jdbcTemplate.queryForList(sql.toString(), params.toArray());
+
+        // 查总数（同样条件，去掉 LIMIT/OFFSET）
+        StringBuilder countParams = new StringBuilder();
+        countParams.append("SELECT COUNT(*) FROM sys_user u ");
+        countParams.append("INNER JOIN sys_user_role ur ON u.id = ur.user_id AND ur.role_id = ").append(DOCTOR_ROLE_ID).append(" ");
+        countParams.append("WHERE u.is_deleted = 0 ");
+        List<Object> cp = new ArrayList<>();
+        if (community != null && !community.isEmpty()) { countParams.append("AND u.community = ? "); cp.add(community); }
+        if (keyword != null && !keyword.isEmpty()) { countParams.append("AND (u.real_name LIKE ? OR u.phone LIKE ?) "); cp.add("%" + keyword + "%"); cp.add("%" + keyword + "%"); }
+        if (gender != null) { countParams.append("AND u.gender = ? "); cp.add(gender); }
+        if (status != null) { countParams.append("AND u.status = ? "); cp.add(status); }
+        Long total = jdbcTemplate.queryForObject(countParams.toString(), Long.class, cp.toArray());
+
+        Page<Map<String, Object>> page = new Page<>(pageNo, pageSize);
+        page.setRecords(records);
+        page.setTotal(total != null ? total : 0);
+        return page;
+    }
+
+    @Override
     public Page<Map<String, Object>> pageDoctors(String community, int pageNo, int pageSize, String keyword) {
         // 用 JdbcTemplate 直接写联表 SQL，因为要同时查签约数和角色过滤
         StringBuilder sql = new StringBuilder();
