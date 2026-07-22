@@ -220,6 +220,7 @@ const handleLogin = async () => {
     })
     const data = res.data
     setStorage('Token', data.token)
+    setStorage('UserId', String(data.userId || ''))
     setStorage('RoleCode', data.roleCode || '')
     setStorage('RoleName', data.roleName || '')
     setStorage('RealName', data.realName || '')

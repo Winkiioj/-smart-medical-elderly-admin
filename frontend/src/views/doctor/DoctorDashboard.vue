@@ -37,6 +37,7 @@
 <script setup>
 import { ref, reactive, onMounted, nextTick } from 'vue'
 import { getDashboard } from '@/api/health.js'
+import { getStorage } from '@/utils/localStorage.js'
 import * as echarts from 'echarts'
 import { User, Plus, Monitor, Warning, Bell } from '@element-plus/icons-vue'
 
@@ -51,7 +52,7 @@ const trendChart = ref(null)
 const ageChart = ref(null)
 
 onMounted(async () => {
-  const doctorId = 3
+  const doctorId = Number(getStorage('UserId'))
   const { data } = await getDashboard(doctorId)
   cards[0].val = data.totalElderly ?? 0
   cards[1].val = data.newThisMonth ?? 0

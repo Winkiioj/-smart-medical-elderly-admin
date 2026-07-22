@@ -32,9 +32,10 @@ import { ref, onMounted, nextTick, computed } from 'vue'
 import { getElderlyList } from '@/api/elderly.js'
 import { getTrend } from '@/api/health.js'
 import request from '@/utils/request.js'
+import { getStorage } from '@/utils/localStorage.js'
 import * as echarts from 'echarts'
 
-const doctorId = 3
+const doctorId = Number(getStorage('UserId'))
 const elderlyList = ref([]), elderlyId = ref(null)
 const metricType = ref('systolic_pressure')
 const dateRange = ref([]), chartDom = ref(null)

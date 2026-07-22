@@ -238,6 +238,7 @@ const activeMenu = computed(() => route.path)
 
 const handleLogout = () => {
   delStorage('Token')
+  delStorage('UserId')
   delStorage('RoleCode')
   delStorage('RoleName')
   delStorage('RealName')

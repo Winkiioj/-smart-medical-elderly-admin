@@ -95,6 +95,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser>
 
         Map<String, Object> result = new HashMap<>();
         result.put("token", token);
+        result.put("userId", user.getId());
         result.put("roleCode", firstRoleCode);
         result.put("roleName", firstRoleName);
         result.put("roles", roles);

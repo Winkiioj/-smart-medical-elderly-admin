@@ -93,7 +93,7 @@ const communityList = ref([])
 const query = reactive({ pageNo: 1, pageSize: 10, doctorId: null, community: '', alertLevel: '', status: '', alertType: '', startTime: '', endTime: '' })
 
 // 初始化：角色感知的默认参数
-if (isDoctor.value) query.doctorId = 3
+if (isDoctor.value) query.doctorId = Number(getStorage('UserId'))
 
 const levelTag = (v) => ({ 1: 'info', 2: 'warning', 3: 'danger' }[v] || 'info')
 const levelText = (v) => ({ 1: '轻度', 2: '中度', 3: '重度' }[v] || '')

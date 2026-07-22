@@ -76,9 +76,10 @@ import { ref, reactive } from 'vue'
 import { importHealthData, getTemplate } from '@/api/health.js'
 import { ElMessage } from 'element-plus'
 import { UploadFilled } from '@element-plus/icons-vue'
+import { getStorage } from '@/utils/localStorage.js'
 
 const step = ref(1)
-const doctorId = 3
+const doctorId = Number(getStorage('UserId'))
 const importing = ref(false)
 const importResult = reactive({ totalCount: 0, successCount: 0, failCount: 0, warningCount: 0, errors: [] })
 

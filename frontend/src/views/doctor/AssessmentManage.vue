@@ -50,12 +50,13 @@ import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { getReportPage, createReport, getElderlyList, getTemplateList } from '@/api/assessment'
+import { getStorage } from '@/utils/localStorage.js'
 
 const router = useRouter()
 const loading = ref(false); const tableData = ref([]); const total = ref(0); const showCreate = ref(false)
 const elderlyList = ref([]); const templateList = ref([])
-const query = reactive({ pageNo: 1, pageSize: 10, doctorId: 3 })
-const createForm = reactive({ elderlyId: null, templateId: null, doctorId: 3 })
+const query = reactive({ pageNo: 1, pageSize: 10, doctorId: Number(getStorage('UserId')) })
+const createForm = reactive({ elderlyId: null, templateId: null, doctorId: Number(getStorage('UserId')) })
 
 const loadDialogData = async () => {
   const [elderlyRes, tmplRes] = await Promise.all([getElderlyList(3), getTemplateList()])

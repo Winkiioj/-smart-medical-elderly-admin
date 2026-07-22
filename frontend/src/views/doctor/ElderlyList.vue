@@ -203,7 +203,7 @@ const form = reactive({ id: null, name: '', idCard: '', gender: 1, phone: '', co
 const detailVisible = ref(false)
 const detail = ref(null)
 
-const doctorId = 3 // TODO: from Token
+const doctorId = Number(getStorage('UserId'))
 
 const search = async () => {
   loading.value = true

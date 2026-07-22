@@ -84,6 +84,7 @@ import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { getFollowupPlanPage, createPlan, startPlan, updatePlanDate, getElderlyList } from '@/api/followup'
+import { getStorage } from '@/utils/localStorage.js'
 
 const router = useRouter()
 const loading = ref(false)
@@ -91,9 +92,9 @@ const tableData = ref([])
 const total = ref(0)
 const showCreate = ref(false)
 const elderlyList = ref([])
-const form = reactive({ elderlyId: null, followupType: 1, planDate: '', followupContent: '', doctorId: 3 })
+const form = reactive({ elderlyId: null, followupType: 1, planDate: '', followupContent: '', doctorId: Number(getStorage('UserId')) })
 const rules = { elderlyId: [{ required: true }], followupType: [{ required: true }], planDate: [{ required: true }] }
-const query = reactive({ pageNo: 1, pageSize: 10, doctorId: 3, followupType: '', status: '' })
+const query = reactive({ pageNo: 1, pageSize: 10, doctorId: Number(getStorage('UserId')), followupType: '', status: '' })
 
 const typeText = (v) => ({ 1: '电话', 2: '上门', 3: '门诊' }[v] || '')
 const statusTag = (v) => ({ 0: 'info', 1: 'primary', 2: 'success', 3: 'danger' }[v] || 'info')
