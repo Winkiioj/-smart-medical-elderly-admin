@@ -35,7 +35,7 @@ public class ElderlyController {
     @Operation(summary = "分页查询老人列表(多维度筛选)")
     @GetMapping("/list")
     public CommonResult<IPage<Elderly>> list(
-            @RequestParam Long doctorId,
+            @RequestParam(required = false) Long doctorId,
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) String community,
             @RequestParam(required = false) Integer gender,

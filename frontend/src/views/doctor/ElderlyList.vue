@@ -203,7 +203,7 @@ const form = reactive({ id: null, name: '', idCard: '', gender: 1, phone: '', co
 const detailVisible = ref(false)
 const detail = ref(null)
 
-const doctorId = Number(getStorage('UserId'))
+const doctorId = isDoctor.value ? Number(getStorage('UserId')) : null
 
 const search = async () => {
   loading.value = true

@@ -27,8 +27,10 @@ public class ElderlyServiceImpl extends ServiceImpl<ElderlyMapper, Elderly>
                                 int page, int size) {
         LambdaQueryWrapper<Elderly> wrapper = new LambdaQueryWrapper<>();
 
-        // 数据权限：签约医生
-        wrapper.eq(Elderly::getDoctorId, doctorId);
+        // 数据权限：签约医生（仅医生传入，ORG/COM不传则查全部）
+        if (doctorId != null) {
+            wrapper.eq(Elderly::getDoctorId, doctorId);
+        }
 
         // 关键词
         if (StringUtils.hasText(keyword)) {

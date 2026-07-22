@@ -97,12 +97,16 @@ public class WarningRecordServiceImpl
                                       String startTime, String endTime) {
         List<Long> elderlyIds;
         if (community != null && !community.isEmpty()) {
-            // 社区管理员：按社区过滤，查看本社区所有老人预警
+            // 社区管理员/机构管理员选中社区：按社区过滤
             elderlyIds = jdbcTemplate.queryForList(
                     "SELECT id FROM elderly WHERE community = ? AND is_deleted = 0",
                     Long.class, community);
-        } else {
+        } else if (doctorId != null) {
+            // 医生：按签约老人过滤
             elderlyIds = getElderlyIdsByDoctor(doctorId);
+        } else {
+            // 机构管理员未选社区：查看全部（不按elderly_id过滤）
+            elderlyIds = null;
         }
         Page<WarningRecord> page = new Page<>(pageNo, pageSize);
         IPage<WarningRecord> result = this.baseMapper.selectPageByDoctor(
