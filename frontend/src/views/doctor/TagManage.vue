@@ -96,6 +96,7 @@
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { getTagList, addTag, updateTag, deleteTag, getTagsByElderly, saveTagsByElderly } from '@/api/tag'
+import { getStorage } from '@/utils/localStorage.js'
 import { getElderlyList } from '@/api/followup'
 
 const loading = ref(false)
@@ -157,7 +158,7 @@ const handleSubmit = async () => {
 // ===== 老人标签分配 =====
 const loadElderlyList = async () => {
   try {
-    const res = await getElderlyList(3) // TODO: 从登录用户获取
+    const res = await getElderlyList(Number(getStorage('UserId')))
     if (res.code === 200) elderlyList.value = res.data || []
   } catch { ElMessage.error('加载老人列表失败') }
 }

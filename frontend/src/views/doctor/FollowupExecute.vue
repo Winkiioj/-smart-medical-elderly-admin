@@ -134,10 +134,10 @@ const fetchData = async () => {
       })
     }
 
-    // 3. 查老人详情
+    // 3. 查老人详情（B接口返回 { elderly: {...}, contacts: [...] }）
     try {
       const elderRes = await getElderlyDetail(plan.elderlyId)
-      if (elderRes.code === 200) elderly.value = elderRes.data
+      if (elderRes.code === 200 && elderRes.data) elderly.value = elderRes.data.elderly || elderRes.data
     } catch { /* 老人信息加载失败 */ }
 
     // 4. 查老人标签

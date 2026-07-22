@@ -232,7 +232,7 @@ const form = reactive({
   warrantyEnd: '',
   remark: '',
   updateTime: null,
-  operatorId: 1, // TODO: 从登录用户获取
+  operatorId: Number(getStorage('UserId')),
 })
 
 const rules = {

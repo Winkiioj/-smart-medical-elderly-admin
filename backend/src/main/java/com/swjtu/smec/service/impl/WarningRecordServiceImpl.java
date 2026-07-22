@@ -168,10 +168,11 @@ public class WarningRecordServiceImpl
             plan.setFollowupContent("【预警生成】" + record.getAlertTitle());
             plan.setStatus(0);
             plan.setCreateTime(LocalDateTime.now());
-            followupPlanService.save(plan);  // 直接插入，跳过 create() 的去重检查
+            followupPlanService.insertPlan(plan);  // 通过Service方法插入，不走create去重
             planMsg = "，随访计划已自动生成。请前往随访管理执行";
         } catch (Exception e) {
-            planMsg = "。注意：随访计划自动生成异常，请手动创建";
+            planMsg = "。随访计划自动生成异常：" + e.getMessage();
+            e.printStackTrace();
         }
 
         return CommonResult.success("接单成功" + planMsg);

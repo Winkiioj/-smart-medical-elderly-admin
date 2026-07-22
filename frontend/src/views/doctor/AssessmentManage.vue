@@ -59,7 +59,8 @@ const query = reactive({ pageNo: 1, pageSize: 10, doctorId: Number(getStorage('U
 const createForm = reactive({ elderlyId: null, templateId: null, doctorId: Number(getStorage('UserId')) })
 
 const loadDialogData = async () => {
-  const [elderlyRes, tmplRes] = await Promise.all([getElderlyList(3), getTemplateList()])
+  const doctorId = Number(getStorage('UserId'))
+  const [elderlyRes, tmplRes] = await Promise.all([getElderlyList(doctorId), getTemplateList()])
   if (elderlyRes.code === 200) elderlyList.value = elderlyRes.data || []
   if (tmplRes.code === 200) templateList.value = tmplRes.data || []
 }
