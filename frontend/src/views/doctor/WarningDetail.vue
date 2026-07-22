@@ -24,7 +24,7 @@
             <el-descriptions-item label="触发值">{{ warning.triggerValue }}</el-descriptions-item>
             <el-descriptions-item label="阈值">{{ warning.thresholdValue || '--' }}</el-descriptions-item>
             <el-descriptions-item label="触发时间">{{ warning.createTime }}</el-descriptions-item>
-            <el-descriptions-item label="处理人">{{ warning.handlerId || '--' }}</el-descriptions-item>
+            <el-descriptions-item label="处理人">{{ warning.handlerName || '--' }}</el-descriptions-item>
             <el-descriptions-item label="处理意见" :span="2">{{ warning.handleOpinion || '--' }}</el-descriptions-item>
             <el-descriptions-item label="处理结果">{{ warning.handleResult || '--' }}</el-descriptions-item>
             <el-descriptions-item label="处理时间">{{ warning.handleTime || '--' }}</el-descriptions-item>

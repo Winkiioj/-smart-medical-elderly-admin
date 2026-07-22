@@ -12,6 +12,11 @@
     <!-- 筛选栏 -->
     <el-card shadow="hover" style="margin-bottom: 16px">
       <el-form :inline="true" :model="query" class="search-form">
+        <el-form-item v-if="isOrgAdmin || isDeviceAdmin" label="所属社区">
+          <el-select v-model="query.community" placeholder="全部社区" clearable style="width:150px" @change="handleSearch">
+            <el-option v-for="c in communityList" :key="c.id" :label="c.name" :value="c.name" />
+          </el-select>
+        </el-form-item>
         <el-form-item label="设备状态">
           <el-select v-model="query.status" placeholder="全部" clearable style="width: 130px">
             <el-option label="在线" :value="1" />
@@ -188,8 +193,13 @@ import { ref, reactive, computed, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { getDevicePage, getDeviceDetail, addDevice, updateDevice, updateDeviceStatus, getDeviceStats } from '@/api/device'
 import { getStorage } from '@/utils/localStorage.js'
+import request from '@/utils/request.js'
 
+const isOrgAdmin = computed(() => getStorage('RoleCode') === 'ORG_ADMIN')
 const isDeviceAdmin = computed(() => getStorage('RoleCode') === 'DEVICE_ADMIN')
+const isComAdmin = computed(() => getStorage('RoleCode') === 'COM_ADMIN')
+const myCommunity = computed(() => getStorage('Community') || '')
+const communityList = ref([])
 const detailVisible = ref(false)
 const detailData = ref(null)
 
@@ -203,7 +213,7 @@ const query = reactive({
   keyword: '',
   deviceType: '',
   status: '',
-  community: '',
+  community: isComAdmin.value ? myCommunity.value : '',
 })
 const stats = reactive({ online: 0, offline: 0, repairing: 0, scrapped: 0 })
 
@@ -280,7 +290,8 @@ const handleReset = () => {
   query.keyword = ''
   query.deviceType = ''
   query.status = ''
-  query.community = ''
+  if (isComAdmin.value) query.community = myCommunity.value
+  else query.community = ''
   query.pageNo = 1
   fetchData()
 }
@@ -365,7 +376,14 @@ const resetForm = () => {
 }
 
 // ===== 生命周期 =====
+const loadCommunities = async () => {
+  try {
+    const res = await request({ url: '/api/community/enabled', method: 'get' })
+    if (res.code === 200) communityList.value = res.data || []
+  } catch { communityList.value = [] }
+}
 onMounted(() => {
+  if (isOrgAdmin.value || isDeviceAdmin.value) loadCommunities()
   fetchData()
   fetchStats()
 })

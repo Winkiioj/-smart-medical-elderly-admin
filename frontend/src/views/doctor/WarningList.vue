@@ -10,6 +10,11 @@
     <!-- 筛选栏 -->
     <el-card shadow="hover" style="margin-bottom: 16px">
       <el-form :inline="true" :model="query">
+        <el-form-item v-if="isOrgAdmin" label="社区">
+          <el-select v-model="query.community" placeholder="全部社区" clearable style="width:150px" @change="handleSearch">
+            <el-option v-for="c in communityList" :key="c.id" :label="c.name" :value="c.name" />
+          </el-select>
+        </el-form-item>
         <el-form-item label="预警级别">
           <el-select v-model="query.alertLevel" placeholder="全部" clearable style="width:110px">
             <el-option :value="1" label="轻度" />
@@ -71,13 +76,24 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
 import { getWarningPage } from '@/api/warning'
+import { getStorage } from '@/utils/localStorage.js'
+import request from '@/utils/request.js'
+
+const isOrgAdmin = computed(() => getStorage('RoleCode') === 'ORG_ADMIN')
+const isComAdmin = computed(() => getStorage('RoleCode') === 'COM_ADMIN')
+const isDoctor = computed(() => getStorage('RoleCode') === 'DOCTOR')
+const myCommunity = computed(() => getStorage('Community') || '')
 
 const loading = ref(false)
 const tableData = ref([])
 const total = ref(0)
-const query = reactive({ pageNo: 1, pageSize: 10, doctorId: 3, alertLevel: '', status: '', alertType: '', startTime: '', endTime: '' })
+const communityList = ref([])
+const query = reactive({ pageNo: 1, pageSize: 10, doctorId: null, community: '', alertLevel: '', status: '', alertType: '', startTime: '', endTime: '' })
+
+// 初始化：角色感知的默认参数
+if (isDoctor.value) query.doctorId = 3
 
 const levelTag = (v) => ({ 1: 'info', 2: 'warning', 3: 'danger' }[v] || 'info')
 const levelText = (v) => ({ 1: '轻度', 2: '中度', 3: '重度' }[v] || '')
@@ -87,6 +103,8 @@ const statusText = (v) => ({ 0: '待处理', 1: '处理中', 2: '已完成', 3: 
 const fetchData = async () => {
   loading.value = true
   try {
+    // 社区管理员按本社区过滤；机构管理员按选中的社区（可选）
+    if (isComAdmin.value) query.community = myCommunity.value
     const res = await getWarningPage({ ...query })
     if (res.code === 200) { tableData.value = res.data; total.value = res.total }
   } finally { loading.value = false }
@@ -95,8 +113,21 @@ const fetchData = async () => {
 const handleSearch = () => { query.pageNo = 1; fetchData() }
 const handleReset = () => {
   Object.assign(query, { pageNo: 1, alertLevel: '', status: '', alertType: '' })
+  if (isOrgAdmin.value) query.community = ''
   fetchData()
 }
 
-onMounted(() => fetchData())
+const loadCommunities = async () => {
+  try {
+    const res = await request({ url: '/api/community/enabled', method: 'get' })
+    if (res.code === 200) communityList.value = res.data || []
+  } catch { communityList.value = [] }
+}
+
+onMounted(() => {
+  // 社区管理员锁定本社区，不需要加载社区列表；机构管理员加载社区列表供筛选
+  if (isComAdmin.value) query.community = myCommunity.value
+  if (isOrgAdmin.value) loadCommunities()
+  fetchData()
+})
 </script>

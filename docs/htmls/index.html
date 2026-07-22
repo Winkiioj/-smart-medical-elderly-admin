@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>智慧医养管理系统 — 原型页面索引</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'PingFang SC','Microsoft YaHei',sans-serif;background:#f0f2f5;min-height:100vh;display:flex;align-items:center;justify-content:center}
+.container{max-width:800px;width:100%;padding:40px}
+h1{text-align:center;color:#262626;margin-bottom:8px;font-size:24px}
+.subtitle{text-align:center;color:#8c8c8c;margin-bottom:40px;font-size:14px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.card{background:#fff;border-radius:12px;padding:28px;box-shadow:0 1px 3px rgba(0,0,0,.06);transition:.2s;text-decoration:none;color:inherit;display:block}
+.card:hover{box-shadow:0 4px 12px rgba(0,0,0,.1);transform:translateY(-2px)}
+.card .uc{font-size:12px;color:#8c8c8c;margin-bottom:8px}
+.card .title{font-size:18px;font-weight:600;color:#262626;margin-bottom:8px}
+.card .desc{font-size:13px;color:#595959;line-height:1.6}
+.card .role{display:inline-block;padding:3px 10px;border-radius:4px;font-size:12px;margin-top:12px}
+.role-admin{background:#e6f7ff;color:#1890ff}
+.role-community{background:#f6ffed;color:#52c41a}
+.footer{text-align:center;margin-top:40px;color:#bfbfbf;font-size:12px}
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>智慧医养管理系统</h1>
+  <p class="subtitle">原型页面 · 用例对应 UC-ORG-01 ~ UC-COM-03 · 负责人 A</p>
+
+  <div class="grid">
+    <a href="01-全局报表-机构管理员.html" class="card">
+      <div class="uc">UC-ORG-01 / UC-ORG-02</div>
+      <div class="title">📊 全局报表 · 社区对比</div>
+      <div class="desc">机构管理员视角。各社区指标对比表格（高亮异常）、柱状图对比、社区下钻详细指标、Excel 导出。</div>
+      <span class="role role-admin">角色：机构管理员</span>
+    </a>
+
+    <a href="02-医生管理-社区管理员.html" class="card">
+      <div class="uc">UC-COM-01</div>
+      <div class="title">👨‍⚕️ 医生档案管理</div>
+      <div class="desc">社区管理员视角。医生列表（签约数/预警处理率/随访率）、新增/编辑/禁用、账号创建后展示初始密码、禁用联动处理。</div>
+      <span class="role role-community">角色：社区管理员</span>
+    </a>
+
+    <a href="03-老人分配-社区管理员.html" class="card">
+      <div class="uc">UC-COM-02</div>
+      <div class="title">🔗 老人分配签约医生</div>
+      <div class="desc">社区管理员视角。三标签页（待分配/已分配/医生负荷）、批量分配、单独分配、调整分配、医生签约上限控制、负荷可视化。</div>
+      <span class="role role-community">角色：社区管理员</span>
+    </a>
+
+    <a href="04-社区报表-社区管理员.html" class="card">
+      <div class="uc">UC-COM-03</div>
+      <div class="title">📋 本社区深度报表</div>
+      <div class="desc">社区管理员视角。四分区（老人/预警/随访/设备）统计图表、时间范围切换、多 Sheet Excel 导出。</div>
+      <span class="role role-community">角色：社区管理员</span>
+    </a>
+  </div>
+
+  <div class="footer">
+    <p>西南交通大学 · 计算机与人工智能学院 · 软件工程专业 · 华迪实训 · 项目 #7</p>
+    <p style="margin-top:4px">用浏览器打开对应 HTML 文件即可预览 | 按 F11 全屏体验更佳</p>
+  </div>
+</div>
+</body>
+</html>

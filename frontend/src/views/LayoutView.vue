@@ -60,6 +60,14 @@
           </el-menu-item>
         </template>
 
+        <!-- 机构管理员专属：医生档案 -->
+        <template v-if="isAdmin">
+          <el-menu-item index="/doctor-archive">
+            <el-icon><UserFilled /></el-icon>
+            <span>医生档案</span>
+          </el-menu-item>
+        </template>
+
         <!-- ===== 社区医生 ===== -->
         <template v-if="isDoctor">
           <el-menu-item index="/doctor-dashboard">

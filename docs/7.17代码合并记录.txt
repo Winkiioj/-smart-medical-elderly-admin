@@ -1,0 +1,40 @@
+7.17代码合并记录
+ ✅ dev分支代码审核+Debug 完成
+
+  已拉取、审核、修复并推送 dev 分支（commit a8225e0），组员现在可以 git pull origin dev 开始今日工作。
+
+  ---
+  📊 审核统计
+
+  ┌────────────┬───────────────────────────────────────────────────────┐
+  │    维度    │                         数据                          │
+  ├────────────┼───────────────────────────────────────────────────────┤
+  │ 审查文件   │ 89个新增/修改文件，~13k行代码                         │
+  ├────────────┼───────────────────────────────────────────────────────┤
+  │ 发现并修复 │ 7个问题（3个🔴阻塞级，3个🔴违规级，1个🟡路由bug）     │
+  ├────────────┼───────────────────────────────────────────────────────┤
+  │ 新建文件   │ 4个（C域的WarningRuleService + WarningRecordService） │
+  ├────────────┼───────────────────────────────────────────────────────┤
+  │ 编译状态   │ ✅ BUILD SUCCESS (78源文件)                           │
+  └────────────┴───────────────────────────────────────────────────────┘
+
+  ---
+  🔑 发现的核心问题
+
+  1. Elderly.java 合并冲突残留 —B的PR合并时未清理干净，导致78个字段getter/setter全部报错，编译失败
+  2. B跨越C域边界直接注入Mapper —HealthRecordServiceImpl 直接 @Autowired
+  WarningRuleMapper，违反铁律2。改为注入C的Service
+  3. A用裸JDBC跨域写C的表 —SysUserServiceImpl.toggleDoctorStatus() 用 jdbcTemplate.update("UPDATE warning_record...")
+  直接操作C的表。改为调用 WarningRecordService.closePendingByDoctorId()
+  4. B的Controller裸JDBC查C的表 —DoctorDashboardController 直连 device/warning_record 表。改为调用
+  DeviceService.getStats() 和 WarningRecordService
+
+  ---
+  📋 组员今日开工前须知
+
+  建议通知组员：
+  - git pull origin dev 拉最新代码
+  - B和C各自从最新dev拉 feature/* 分支继续开发
+  - B注意：健康导入里的预警逻辑已改为调用 warningRuleService / warningRecordService
+  - C注意：我帮你建好了 WarningRuleService 和 WarningRecordService 的基础骨架，后续扩展在这两个文件里加
+  - 任何跨域数据读取，只注入对方的Service，绝不注入Mappe

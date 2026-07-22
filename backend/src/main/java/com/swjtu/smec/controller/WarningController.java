@@ -26,12 +26,13 @@ public class WarningController {
             @RequestParam(defaultValue = "1") int pageNo,
             @RequestParam(defaultValue = "10") int pageSize,
             @RequestParam(required = false) Long doctorId,
+            @RequestParam(required = false) String community,
             @RequestParam(required = false) Integer alertLevel,
             @RequestParam(required = false) String alertType,
             @RequestParam(required = false) Integer status,
             @RequestParam(required = false) String startTime,
             @RequestParam(required = false) String endTime) {
-        return warningService.pageByDoctor(pageNo, pageSize, doctorId,
+        return warningService.pageByDoctor(pageNo, pageSize, doctorId, community,
                 alertLevel, alertType, status, startTime, endTime);
     }
 

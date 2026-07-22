@@ -87,6 +87,32 @@ public class DoctorController {
     }
 
     /**
+     * 医生档案：只读查阅（ORG→跨社区 / COM+DOCTOR→本社区）
+     */
+    @Operation(summary = "医生档案（只读，多角色共用）")
+    @GetMapping("/archive")
+    public CommonResult<Page<Map<String, Object>>> archive(
+            @RequestParam(defaultValue = "1") int pageNo,
+            @RequestParam(defaultValue = "10") int pageSize,
+            @RequestParam(required = false) String community,
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) Integer gender,
+            @RequestParam(required = false) Integer status) {
+
+        // 非ORG角色：锁定本社区
+        String roleCode = UserContext.currentRoleCode();
+        if (!"ORG_ADMIN".equals(roleCode)) {
+            community = UserContext.currentCommunity();
+            if (community == null || community.isEmpty()) {
+                return CommonResult.error(400, "当前用户无社区归属");
+            }
+        }
+
+        Page<Map<String, Object>> page = sysUserService.pageDoctorsArchive(community, pageNo, pageSize, keyword, gender, status);
+        return CommonResult.success(page, page.getTotal());
+    }
+
+    /**
      * 下拉列表：本社区启用状态的医生（供老人分配用）
      */
     @Operation(summary = "医生下拉列表")

@@ -1,0 +1,66 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName Microsoft YaHei
+skinparam defaultFontSize 16
+skinparam defaultFontColor #333333
+skinparam ArrowThickness 2
+skinparam ActivityBorderColor #1565C0
+skinparam ActivityBackgroundColor #E3F2FD
+skinparam ActivityStartColor #4CAF50
+skinparam ActivityEndColor #F44336
+skinparam ActivityBarColor #FF9800
+skinparam DiamondBackgroundColor #FFF3E0
+skinparam DiamondBorderColor #F57C00
+
+title AOP Token 认证与前端权限控制流程
+
+|后端 AOP 切面|
+start
+:HTTP 请求到达 Controller;
+:进入 AroundCut.checkToken();
+
+if (是否有 @NoToken 注解?) then (有)
+  :跳过校验，直接放行;
+else (无)
+  :提取请求头 Header Token;
+  :查询 Redis 是否有效;
+
+  if (Token 有效?) then (是)
+    :认证通过;
+  else (否)
+    #F44336:返回 401，前端跳转登录页;
+    stop
+  endif
+endif
+
+:pjp.proceed() 执行业务方法;
+:UserContext 获取当前用户信息;
+:返回数据给前端;
+
+|前端 路由守卫|
+:浏览器路由跳转，触发 beforeEach;
+:检查 localStorage Token;
+
+if (Token 是否登录?) then (未登录)
+  #F44336:跳转 /login;
+  stop
+else (已登录)
+endif
+
+:按 RoleCode 分流到对应工作台;
+:检查路由 meta.roles;
+
+if (角色是否有权限?) then (无权限)
+  #F44336:跳转 /forbidden (403);
+  stop
+else (有权限)
+endif
+
+:next() 放行，页面渲染;
+
+|前端 页面层|
+:组件 setup();
+:页面级 v-if 权限控制\n管理员只读 / 医生可编辑;
+stop
+
+@enduml
