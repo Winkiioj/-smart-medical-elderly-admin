@@ -129,6 +129,12 @@ public class FollowupPlanServiceImpl
     }
 
     @Override
+    public FollowupPlan insertPlan(FollowupPlan plan) {
+        this.baseMapper.insert(plan);
+        return plan;
+    }
+
+    @Override
     public CommonResult getPlanById(Long planId) {
         FollowupPlan plan = this.baseMapper.selectById(planId);
         if (plan == null) return CommonResult.error(404, "计划不存在");

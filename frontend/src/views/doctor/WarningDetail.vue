@@ -150,7 +150,7 @@ const fetchDetail = async () => {
 
 const handleAccept = async () => {
   try {
-    const res = await acceptWarning(warning.id, 3) // TODO: 真实 handlerId
+    const res = await acceptWarning(warning.id, Number(getStorage('UserId')))
     if (res.code === 200) {
       ElMessage.success(res.data || '已接单，随访计划已自动生成')
       fetchDetail()

@@ -17,4 +17,6 @@ public interface FollowupPlanService extends IService<FollowupPlan> {
     CommonResult updatePlanDate(Long planId, LocalDate newDate);
     CommonResult countCompletedByDoctorId(Long doctorId);
     CommonResult getPlanById(Long planId);
+
+    FollowupPlan insertPlan(FollowupPlan plan);
 }

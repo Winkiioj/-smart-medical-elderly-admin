@@ -60,6 +60,7 @@
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { getDevicePage, submitRepair, getRepairRecords } from '@/api/device'
+import { getStorage } from '@/utils/localStorage.js'
 
 const formRef = ref(null)
 const devices = ref([])
@@ -69,8 +70,8 @@ const form = reactive({
   deviceId: null,
   faultType: '',
   faultDescription: '',
-  reporterId: 1,      // TODO: 从登录用户获取
-  reporterName: '张医生', // TODO: 从登录用户获取
+  reporterId: Number(getStorage('UserId')),
+  reporterName: getStorage('RealName') || '医生',
 })
 
 const rules = {

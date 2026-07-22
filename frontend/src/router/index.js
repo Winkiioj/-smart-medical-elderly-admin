@@ -25,7 +25,6 @@ const routes = [
   {
     path: '/',
     component: () => import('@/views/LayoutView.vue'),
-    redirect: '/doctor-dashboard',
     children: [
       // ===== A 负责：管理员通用 =====
       {
