@@ -49,10 +49,10 @@ public class ElderlyServiceImpl extends ServiceImpl<ElderlyMapper, Elderly>
         if (ageMin != null && ageMax != null) {
             wrapper.between(Elderly::getAge, ageMin, ageMax);
         }
-        // 状态（不传默认查在院）
-        if (status != null) {
+        // 状态（不传默认查在院；-1 表示不过滤）
+        if (status != null && status != -1) {
             wrapper.eq(Elderly::getStatus, status);
-        } else {
+        } else if (status == null) {
             wrapper.eq(Elderly::getStatus, 1);
         }
         // 标签筛选：通过子查询 elderly_tag_mapping 表
