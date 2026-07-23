@@ -104,23 +104,24 @@ public class AssessmentReportServiceImpl
         List<AssessmentDimension> dims = dimensionMapper.selectByTemplateId(report.getTemplateId());
         List<AssessmentScore> scores = scoreMapper.selectByReportId(reportId);
 
-        // 计算加权总分
+        // 计算加权总分（维度得分×权重求和，满分同样加权）
         BigDecimal total = BigDecimal.ZERO;
-        int full = 0;
+        BigDecimal full = BigDecimal.ZERO;
         for (AssessmentDimension d : dims) {
             int score = 0;
             for (AssessmentScore s : scores) {
                 if (s.getDimensionId().equals(d.getId())) { score = s.getScore(); break; }
             }
-            total = total.add(BigDecimal.valueOf(score).multiply(d.getWeight()));
-            full += d.getMaxScore();
+            BigDecimal weightedScore = BigDecimal.valueOf(score).multiply(d.getWeight());
+            total = total.add(weightedScore);
+            full = full.add(BigDecimal.valueOf(d.getMaxScore()).multiply(d.getWeight()));
         }
         report.setTotalScore(total.setScale(1, RoundingMode.HALF_UP));
-        report.setFullScore(full);
+        report.setFullScore(full.setScale(0, RoundingMode.HALF_UP).intValue());
 
         // 判定等级（防除零）
-        if (full == 0) return CommonResult.error(400, "该模板未配置评分维度，请联系管理员");
-        BigDecimal pct = total.divide(BigDecimal.valueOf(full), 4, RoundingMode.HALF_UP);
+        if (full.compareTo(BigDecimal.ZERO) == 0) return CommonResult.error(400, "该模板未配置评分维度，请联系管理员");
+        BigDecimal pct = total.divide(full, 4, RoundingMode.HALF_UP);
         if (pct.compareTo(BigDecimal.valueOf(0.9)) >= 0) report.setScoreLevel("优秀");
         else if (pct.compareTo(BigDecimal.valueOf(0.75)) >= 0) report.setScoreLevel("良好");
         else if (pct.compareTo(BigDecimal.valueOf(0.6)) >= 0) report.setScoreLevel("一般");
