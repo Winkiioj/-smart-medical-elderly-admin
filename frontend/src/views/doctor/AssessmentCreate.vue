@@ -113,15 +113,6 @@ const getItems = (d) => {
 }
 
 const getPerItemMax = (d) => {
-  try {
-    const guide = JSON.parse(d.scoringGuide)
-    // "每题0-2分" → 2, "每题0-1分" → 1, "数字评分0-10" → 10
-    const m1 = (guide.desc || '').match(/每[题项].*?0[−-](\d+)\s*分/)
-    if (m1) return parseInt(m1[1])
-    const m2 = (guide.desc || '').match(/评分\s*0[−-](\d+)/)
-    if (m2) return parseInt(m2[1])
-  } catch {}
-  // fallback: dimension max / item count (ceil)
   const items = getItems(d)
   return items.length > 0 ? Math.ceil(d.maxScore / items.length) : d.maxScore
 }
