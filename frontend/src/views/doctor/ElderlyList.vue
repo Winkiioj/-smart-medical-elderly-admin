@@ -230,6 +230,9 @@ const search = async () => {
       const now = new Date()
       params.startDate = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().substring(0, 10)
       params.endDate   = now.toISOString().substring(0, 10)
+      if (filters.status == null) {
+        params.status = -1  // 本月新增默认不过滤状态，与Dashboard统计保持一致
+      }
     }
     const { data } = await getElderlyList(params)
     list.value = data.records
